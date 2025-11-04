@@ -258,13 +258,13 @@ const registerMsg = $('#registerMsg');
 loginForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   loginMsg.textContent = '';
-  
+
   const nombre_usuario = $('#loginUsername').value.trim();
   const password = $('#loginPassword').value.trim();
-  
+
   if (!nombre_usuario || !password) {
     loginMsg.textContent = 'Completa todos los campos.';
-    return; 
+    return;
   }
 
   const isPin = /^\d{4}$/.test(password);
@@ -279,7 +279,7 @@ loginForm.addEventListener('submit', async (e) => {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body)
   });
-  
+
   const data = await response.json();
 
   if (response.ok) {
@@ -344,12 +344,13 @@ registerForm.addEventListener('submit', async (e) => {
   const data = await response.json();
 
   if (response.ok) {
-    registerMsg.textContent = 'Registro exitoso! Por favor, inicia sesión.';
+    localStorage.setItem('token', data.token);
+    registerMsg.textContent = 'Registro exitoso! ✅';
     registerMsg.classList.add('ok');
     setTimeout(() => {
       close(registerModal);
-      open(loginModal);
-    }, 1000);
+      loadFavorites();
+    }, 600);
   } else {
     registerMsg.textContent = data.msg;
     registerMsg.classList.remove('ok');
@@ -359,4 +360,14 @@ registerForm.addEventListener('submit', async (e) => {
 // ========================================
 // INICIALIZACIÓN / INITIALIZATION
 // ========================================
-loadFavorites();
+async function loadApp() {
+  await loadFavorites();
+  const statusIndicator = $('.status-indicator');
+  if(localStorage.getItem('token')) {
+    $('#btnProfile').innerHTML = `<i class='bx bxs-user'></i><span class="status-indicator online"></span>`;
+  } else {
+    $('#btnProfile').innerHTML = `<i class='bx bx-user'></i><span class="status-indicator"></span>`;
+  }
+}
+
+loadApp();
