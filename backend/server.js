@@ -47,7 +47,9 @@ app.post('/api/auth/register', (req, res) => {
     if (err) {
       return res.status(400).json({ msg: 'Username already exists' });
     }
+    const token = jwt.sign({ id: this.lastID }, JWT_SECRET, { expiresIn: 3600 });
     res.json({
+      token,
       user: {
         id: this.lastID,
         nombre_usuario: nombre_usuario

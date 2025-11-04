@@ -393,12 +393,13 @@ registerForm.addEventListener('submit', async (e) => {
   const data = await response.json();
 
   if (response.ok) {
-    registerMsg.textContent = 'Registro exitoso! Por favor, inicia sesión.';
+    localStorage.setItem('token', data.token);
+    registerMsg.textContent = 'Registro exitoso! ✅';
     registerMsg.classList.add('ok');
     setTimeout(() => {
       close(registerModal);
-      open(loginModal);
-    }, 1000);
+      loadApp();
+    }, 600);
   } else {
     registerMsg.textContent = data.msg;
     registerMsg.classList.remove('ok');
@@ -477,8 +478,11 @@ async function loadApp() {
   renderList(allProducts, '#gridFeed');
   renderList(allProducts, '#gridCategorias');
 
+  const statusIndicator = $('.status-indicator');
   if(localStorage.getItem('token')) {
-    $('#btnProfile').innerHTML = `<i class='bx bxs-user'></i>`;
+    $('#btnProfile').innerHTML = `<i class='bx bxs-user'></i><span class="status-indicator online"></span>`;
+  } else {
+    $('#btnProfile').innerHTML = `<i class='bx bx-user'></i><span class="status-indicator"></span>`;
   }
 }
 
