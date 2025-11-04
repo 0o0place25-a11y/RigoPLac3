@@ -184,6 +184,55 @@ body{
 .msg{ text-align:center; min-height:18px; font-size:14px; color:#d92c20; margin-top:6px; }
 .msg.ok{ color:#1a7f37; }
 
+.separator {
+  text-align: center;
+  margin: 20px 0;
+  color: var(--muted);
+  position: relative;
+}
+
+.separator::before,
+.separator::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: calc(50% - 20px);
+  height: 1px;
+  background-color: var(--line);
+}
+
+.separator::before {
+  left: 0;
+}
+
+.separator::after {
+  right: 0;
+}
+
+.btn-google {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--line);
+  background-color: transparent;
+  color: var(--text);
+  font-size: 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-google:hover {
+  background-color: var(--bg-2);
+}
+
+.btn-google i {
+  font-size: 20px;
+  margin-right: 10px;
+}
+
 /* Badge y chips */
 .badge{ margin-left:8px; padding:2px 8px; font-size:12px; line-height:18px; border-radius:999px; background:#fee2e2; color:#991b1b; border:1px solid #fecaca; }
 .chips{ display:flex; gap:8px; flex-wrap:wrap; margin:8px 0 14px; }
