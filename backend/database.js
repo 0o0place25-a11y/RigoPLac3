@@ -11,7 +11,8 @@ const db = new sqlite3.Database(DBSOURCE, (err) => {
     db.serialize(() => {
       db.run(`CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT UNIQUE,
+        name TEXT,
+        email TEXT UNIQUE,
         password TEXT
       )`);
       db.run(`CREATE TABLE IF NOT EXISTS products (

@@ -8,7 +8,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const JWT_SECRET = 'your_jwt_secret'; // In a real app, use an environment variable
+const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret';
 
 // Auth middleware
 const auth = (req, res, next) => {
@@ -27,22 +27,23 @@ const auth = (req, res, next) => {
 
 // Register
 app.post('/api/auth/register', (req, res) => {
-  const { username, password } = req.body;
-  if (!username || !password) {
+  const { name, email, password } = req.body;
+  if (!name || !email || !password) {
     return res.status(400).json({ msg: 'Please enter all fields' });
   }
 
   const salt = bcrypt.genSaltSync(10);
   const hash = bcrypt.hashSync(password, salt);
 
-  db.run('INSERT INTO users (username, password) VALUES (?, ?)', [username, hash], function(err) {
+  db.run('INSERT INTO users (name, email, password) VALUES (?, ?, ?)', [name, email, hash], function(err) {
     if (err) {
-      return res.status(400).json({ msg: 'Username already exists' });
+      return res.status(400).json({ msg: 'Email already exists' });
     }
     res.json({
       user: {
         id: this.lastID,
-        username: username
+        name: name,
+        email: email
       }
     });
   });
@@ -50,12 +51,12 @@ app.post('/api/auth/register', (req, res) => {
 
 // Login
 app.post('/api/auth/login', (req, res) => {
-  const { username, password } = req.body;
-  if (!username || !password) {
+  const { email, password } = req.body;
+  if (!email || !password) {
     return res.status(400).json({ msg: 'Please enter all fields' });
   }
 
-  db.get('SELECT * FROM users WHERE username = ?', [username], (err, user) => {
+  db.get('SELECT * FROM users WHERE email = ?', [email], (err, user) => {
     if (err || !user) {
       return res.status(400).json({ msg: 'Invalid credentials' });
     }
@@ -70,7 +71,8 @@ app.post('/api/auth/login', (req, res) => {
       token,
       user: {
         id: user.id,
-        username: user.username
+        name: user.name,
+        email: user.email
       }
     });
   });

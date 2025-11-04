@@ -220,9 +220,10 @@ $$('.chip').forEach(chip => {
 });
 
 // ========================================
-// MODALES: LOGIN / CREAR / PRODUCTO
+// MODALES: LOGIN / REGISTER / CREAR / PRODUCTO
 // ========================================
 const loginModal = $('#loginModal');
+const registerModal = $('#registerModal');
 const createModal = $('#createModal');
 
 const open = (el) => { 
@@ -242,17 +243,26 @@ $('#navCrear').addEventListener('click', (e) => {
   e.preventDefault(); 
   open(createModal); 
 });
+$('#showRegister').addEventListener('click', () => {
+  close(loginModal);
+  open(registerModal);
+});
+$('#showLogin').addEventListener('click', () => {
+  close(registerModal);
+  open(loginModal);
+});
 
 $$('.modal-close').forEach(btn => {
   btn.addEventListener('click', (e) => {
     const which = e.currentTarget.dataset.close;
     if (which === 'login') close(loginModal);
+    if (which === 'register') close(registerModal);
     if (which === 'create') close(createModal);
     if (which === 'product') closeProductModal();
   });
 });
 
-[loginModal, createModal, productModal].forEach(m => 
+[loginModal, registerModal, createModal, productModal].forEach(m =>
   m.addEventListener('click', e => { 
     if (e.target === m) close(m); 
   })
@@ -260,7 +270,8 @@ $$('.modal-close').forEach(btn => {
 
 window.addEventListener('keydown', e => { 
   if (e.key === 'Escape') { 
-    close(loginModal); 
+    close(loginModal);
+    close(registerModal);
     close(createModal);
     closeProductModal();
   } 
@@ -270,59 +281,75 @@ window.addEventListener('keydown', e => {
 // LOGIN & REGISTER
 // ========================================
 const loginForm = $('#loginForm');
-const msg = $('#msg');
-const registerLink = $('.register-link a');
-const loginTitle = $('#loginTitle');
-
-let isRegister = false;
-
-registerLink.addEventListener('click', (e) => {
-  e.preventDefault();
-  isRegister = !isRegister;
-  loginTitle.textContent = isRegister ? 'Register' : 'Login';
-  registerLink.innerHTML = isRegister ? `Already have an account? <a href="#">Login</a>` : `Don't have an account? <a href="#">Register</a>`;
-});
+const loginMsg = $('#loginMsg');
+const registerForm = $('#registerForm');
+const registerMsg = $('#registerMsg');
 
 loginForm.addEventListener('submit', async (e) => {
   e.preventDefault();
-  msg.textContent = '';
+  loginMsg.textContent = '';
   
-  const username = loginForm.username.value.trim();
-  const password = loginForm.password.value.trim();
+  const email = $('#loginEmail').value.trim();
+  const password = $('#loginPassword').value.trim();
   
-  if (!username || !password) {
-    msg.textContent = 'Completa usuario y contraseña.'; 
+  if (!email || !password) {
+    loginMsg.textContent = 'Completa email y contraseña.';
     return; 
   }
   
-  const url = isRegister ? `${API_URL}/auth/register` : `${API_URL}/auth/login`;
-  const response = await fetch(url, {
+  const response = await fetch(`${API_URL}/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username, password })
+    body: JSON.stringify({ email, password })
   });
 
   const data = await response.json();
   
   if (response.ok) {
-    if (isRegister) {
-      msg.textContent = 'Registration successful! Please log in.';
-      msg.classList.add('ok');
-      isRegister = false;
-      loginTitle.textContent = 'Login';
-      registerLink.innerHTML = `Don't have an account? <a href="#">Register</a>`;
-    } else {
-      localStorage.setItem('token', data.token);
-      msg.textContent = 'Login exitoso ✅';
-      msg.classList.add('ok');
-      setTimeout(() => {
-        close(loginModal);
-        loadApp();
-      }, 600);
-    }
+    localStorage.setItem('token', data.token);
+    loginMsg.textContent = 'Login exitoso ✅';
+    loginMsg.classList.add('ok');
+    setTimeout(() => {
+      close(loginModal);
+      loadApp();
+    }, 600);
   } else {
-    msg.textContent = data.msg;
-    msg.classList.remove('ok');
+    loginMsg.textContent = data.msg;
+    loginMsg.classList.remove('ok');
+  }
+});
+
+registerForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  registerMsg.textContent = '';
+
+  const name = $('#registerName').value.trim();
+  const email = $('#registerEmail').value.trim();
+  const password = $('#registerPassword').value.trim();
+
+  if (!name || !email || !password) {
+    registerMsg.textContent = 'Completa todos los campos.';
+    return;
+  }
+
+  const response = await fetch(`${API_URL}/auth/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, email, password })
+  });
+
+  const data = await response.json();
+
+  if (response.ok) {
+    registerMsg.textContent = 'Registro exitoso! Por favor, inicia sesión.';
+    registerMsg.classList.add('ok');
+    setTimeout(() => {
+      close(registerModal);
+      open(loginModal);
+    }, 1000);
+  } else {
+    registerMsg.textContent = data.msg;
+    registerMsg.classList.remove('ok');
   }
 });
 
@@ -389,7 +416,6 @@ async function loadApp() {
     userFavorites = await getFavorites();
   }
 
-  // You can decide what to render here, for now, just all products
   renderList(allProducts, '#gridFeed');
   renderList(allProducts, '#gridCategorias');
   renderList([], '#gridMine');
