@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>RigoCompra!</title>
+
+  <!-- Iconos -->
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+  <!-- CSS -->
+  <link rel="stylesheet" href="index.css">
+</head>
+<body>
+
+  <!-- SIDEBAR (izquierda) LOGO-->
+  <aside class="sidebar">
+    <a class="brand" href="index.html" aria-label="RigoCompra – inicio">
+      <img class="brand-img" src="LOGO.png" alt="RigoCompra">
+    </a>
+
+    <nav class="nav">
+      <!-- 🔍 Explorar -->
+      <a class="nav-item active" data-view="inicio" href="#"><i class='bx bx-home'></i><span>Inicio</span></a>
+      <a class="nav-item" data-view="explorar" href="#"><i class='bx bx-compass'></i><span>Explorar</span></a>
+    
+
+      <h4 class="nav-section">Publicar y gestionar</h4>
+      <a id="navCrear" class="nav-item" href="#"><i class='bx bx-pencil'></i><span>Crear publicación</span></a>
+      <a class="nav-item" data-view="mis-publicaciones" href="#"><i class='bx bx-folder-open'></i><span>Mis publicaciones</span></a>
+
+      <h4 class="nav-section">Comunicación</h4>
+      <a class="nav-item" data-view="mensajes" href="#"><i class='bx bx-message-square-dots'></i><span>Mensajes</span><span class="badge" id="badgeMsg" hidden>0</span></a>
+
+      <h4 class="nav-section">Social / Comunidad</h4>
+      <a class="nav-item" href="favoritos.html"><i class='bx bx-heart'></i><span>Favoritos</span></a>
+      <a class="nav-item" data-view="destacados" href="#"><i class='bx bx-star'></i><span>Emprendimientos</span></a>
+      
+      <h4 class="nav-section">Eventos UVG</h4>
+      <a class="nav-item" data-view="eventos" href="#"><i class='bx bx-calendar-event'></i><span>Ferias y eventos</span></a>
+
+      <h4 class="nav-section">Cuenta</h4>
+      
+      <a class="nav-item" data-view="salir" href="#"><i class='bx bx-log-out'></i><span>Salir</span></a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="icon-btn" title="Ayuda"><i class='bx bx-help-circle'></i></button>
+    </div>
+  </aside>
+
+  <!-- PÁGINA -->
+  <div class="page">
+
+    <!-- TOPBAR (UP)-->
+    <header class="topbar">
+      <div class="left">
+        <div class="search">
+          <i class='bx bx-search'></i>
+          <input id="searchInput" type="text" placeholder="Búsqueda" aria-label="Buscar">
+        </div>
+      </div>
+      <div class="right">
+        <button id="btnProfile" class="icon-btn" title="Perfil"><i class='bx bx-user'></i></button>
+        <button class="icon-btn" title="Lista"><i class='bx bx-list-ul'></i></button>
+        <button class="icon-btn" title="Panel"><i class='bx bx-layout'></i></button>
+      </div>
+    </header>
+
+    <!-- CONTENIDO -->
+    <main class="content">
+      <!-- Vistas (una visible a la vez) -->
+      <section class="section view" id="view-inicio" data-default>
+        <h2 class="section-title">Publicado por ti</h2>
+        <div id="gridMine" class="card-grid"></div>
+
+        <h2 class="section-title">Para ti</h2>
+        <div id="gridFeed" class="card-grid"></div>
+      </section>
+
+      <section class="section view" id="view-explorar" hidden>
+        <h2 class="section-title">Explorar todo</h2>
+        <div class="chips">
+          <button class="chip active" data-cat="Todos">Todos</button>
+          <button class="chip" data-cat="Ropa">Ropa</button>
+          <button class="chip" data-cat="Comida">Comida</button>
+          <button class="chip" data-cat="Tecnología">Tecnología</button>
+          <button class="chip" data-cat="Hogar">Hogar</button>
+          <button class="chip" data-cat="Servicios">Servicios</button>
+        </div>
+        <div id="gridCategorias" class="card-grid"></div>
+      </section>
+
+
+      <section class="section view" id="view-mis-publicaciones" hidden>
+        <h2 class="section-title">Mis publicaciones</h2>
+        <div id="gridMineOnly" class="card-grid"></div>
+      </section>
+
+     <section class="section view" id="view-mensajes" hidden>
+  <h2 class="section-title">Mensajes</h2>
+  <p class="muted">Conversaciones con vendedores/compradores.</p>
+
+  <div class="wa-actions">
+    <a class="wa-btn" 
+       href="https://wa.link/sh9x0o" 
+       target="_blank" rel="noopener noreferrer" aria-label="Escribir por WhatsApp">
+      <i class='bx bxl-whatsapp'></i>
+      <span>Enviar mensaje por WhatsApp</span>
+    </a>
+  </div>
+</section>
+
+      <section class="section view" id="view-favoritos" hidden>
+        <h2 class="section-title">Favoritos</h2>
+        <div id="gridFavs" class="card-grid"></div>
+      </section>
+
+      <section class="section view" id="view-destacados" hidden>
+        <h2 class="section-title">Emprendimientos</h2>
+        <p class="muted">Lista de Emprendimientos</p>
+        <ul class="list destacados">
+          <li>🌌 Luna Market</li>
+          <li>🚀 StarTech UVG</li>
+          <li>🪐 Galaxy Clothes</li>
+          <li>✨ Cosmos Bakery</li>
+        </ul>
+      </section>
+
+    
+      <!-- Eventos -->
+      <section class="section view" id="view-eventos" hidden>
+        <h2 class="section-title">Ferias y eventos de emprendimiento</h2>
+        <div class="event-grid">
+          <div class="event-card">
+            <img src="FOTO.jpg" alt="Evento 1">
+            <div class="event-info">
+              <h3>Feria de Emprendimiento</h3>
+              <p>12 Oct — Plaza Central UVG</p>
+            </div>
+          </div>
+          <div class="event-card">
+            <img src="evento2.jpg" alt="Evento 2">
+            <div class="event-info">
+              <h3>Pop-up de Marcas</h3>
+              <p>20 Oct — Edificio E</p>
+            </div>
+          </div>
+          <div class="event-card">
+            <img src="evento3.jpg" alt="Evento 3">
+            <div class="event-info">
+              <h3>Expo Innovación</h3>
+              <p>05 Nov — Auditorio UVG</p>
+            </div>
+          </div>
+          <div class="event-card">
+            <img src="evento4.jpg" alt="Evento 4">
+            <div class="event-info">
+              <h3>Feria Ambiental</h3>
+              <p>18 Nov — Jardines UVG</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+
+  <!-- LOGIN MODAL -->
+  <div id="loginModal" class="modal" aria-hidden="true" role="dialog" aria-labelledby="loginTitle">
+    <div class="modal-dialog">
+      <button class="modal-close" data-close="login" aria-label="Cerrar"><i class='bx bx-x'></i></button>
+      <div class="login-wrapper">
+        <form id="loginForm" novalidate>
+          <h1 id="loginTitle">Login</h1>
+
+          <div class="input-box">
+            <input type="text" id="username" name="username" placeholder="Username" autocomplete="username" required>
+            <i class='bx bxs-user'></i>
+          </div>
+
+          <div class="input-box">
+            <input type="password" id="password" name="password" placeholder="Password" autocomplete="current-password" required minlength="6">
+            <i class='bx bxs-lock-alt'></i>
+          </div>
+
+          <div class="remember-forgot">
+            <label><input type="checkbox" id="remember"> Remember me</label>
+            <a href="#" class="muted">Forgot Password?</a>
+          </div>
+
+          <button type="submit" class="btn">Login</button>
+
+          <div class="register-link">
+            <p>Don't have an account? <a href="#">Register</a></p>
+          </div>
+
+          <p class="msg" id="msg" aria-live="polite"></p>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  
+  <!-- CREAR PUBLICACIÓN (UI) -->
+  <div id="createModal" class="modal" aria-hidden="true" role="dialog" aria-labelledby="createTitle">
+    <div class="modal-dialog">
+      <button class="modal-close" data-close="create" aria-label="Cerrar"><i class='bx bx-x'></i></button>
+      <form id="createForm">
+        <h1 id="createTitle">Crear publicación</h1>
+
+        <div class="input-box"><input id="f_title" placeholder="Título" required></div>
+        <div class="input-box"><input id="f_price" type="number" placeholder="Precio (Q)" required></div>
+        <div class="input-box"><input id="f_city" placeholder="Ciudad" required></div>
+
+        <div class="input-box">
+          <select id="f_category" required>
+            <option value="" disabled selected>Categoría</option>
+            <option>Ropa</option>
+            <option>Comida</option>
+            <option>Tecnología</option>
+            <option>Hogar</option>
+            <option>Servicios</option>
+          </select>
+        </div>
+
+        <div class="input-box"><input id="f_image" placeholder="URL de imagen (opcional)"></div>
+        <div class="input-box"><textarea id="f_desc" placeholder="Descripción" rows="4"></textarea></div>
+
+        <button type="submit" class="btn">Publicar</button>
+        <p class="msg" id="createMsg" aria-live="polite"></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL DE PRODUCTO / PRODUCT MODAL -->
+  <div id="productModal" class="modal" aria-hidden="true" role="dialog" aria-labelledby="productTitle">
+    <div class="modal-dialog modal-product">
+      <button class="modal-close" data-close="product" aria-label="Cerrar"><i class='bx bx-x'></i></button>
+      
+      <div class="product-modal-content">
+        <!-- Imagen del producto -->
+        <div class="product-modal-image">
+          <img id="productModalImg" src="" alt="Producto">
+        </div>
+        
+        <!-- Información del producto -->
+        <div class="product-modal-body">
+          <!-- Título y botón de favoritos -->
+          <div class="product-modal-header">
+            <h2 id="productModalTitle" class="product-modal-title">Título del producto</h2>
+            <button id="productModalFavBtn" class="fav-btn" aria-label="Agregar a favoritos" title="Agregar a favoritos">
+              <i class='bx bx-heart'></i>
+            </button>
+          </div>
+          
+          <!-- Precio -->
+          <div class="product-modal-price">
+            <span id="productModalPrice">Q0</span>
+          </div>
+          
+          <!-- Descripción -->
+          <div class="product-modal-section">
+            <h3>Descripción</h3>
+            <p id="productModalDesc">Descripción del producto</p>
+          </div>
+          
+          <!-- Estado/Condición -->
+          <div class="product-modal-section">
+            <h3>Estado</h3>
+            <p id="productModalCondition">Nuevo</p>
+          </div>
+          
+          <!-- Ubicación y Categoría -->
+          <div class="product-modal-meta">
+            <div class="meta-item">
+              <i class='bx bx-map'></i>
+              <span id="productModalCity">Ciudad</span>
+            </div>
+            <div class="meta-item">
+              <i class='bx bx-category'></i>
+              <span id="productModalCategory">Categoría</span>
+            </div>
+          </div>
+          
+          <!-- Botón de contacto -->
+          <div class="product-modal-actions">
+            <a id="productModalContact" href="#" class="btn-contact" target="_blank" rel="noopener noreferrer">
+              <i class='bx bxl-whatsapp'></i>
+              <span>Contactar vendedor</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JS -->
+  <script src="app.js"></script>
+</body>
+</html>

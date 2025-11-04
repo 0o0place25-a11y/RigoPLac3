@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Favoritos - RigoCompra!</title>
+
+  <!-- Iconos -->
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+  <!-- CSS -->
+  <link rel="stylesheet" href="index.css">
+</head>
+<body>
+
+  <!-- SIDEBAR (izquierda) LOGO-->
+  <aside class="sidebar">
+    <a class="brand" href="index.html" aria-label="RigoCompra – inicio">
+      <img class="brand-img" src="LOGO.png" alt="RigoCompra">
+    </a>
+
+    <nav class="nav">
+      <!-- 🔍 Explorar -->
+      <a class="nav-item" data-view="inicio" href="index.html"><i class='bx bx-home'></i><span>Inicio</span></a>
+      <a class="nav-item" data-view="explorar" href="index.html#explorar"><i class='bx bx-compass'></i><span>Explorar</span></a>
+      
+
+      <h4 class="nav-section">Publicar y gestionar</h4>
+      <a id="navCrear" class="nav-item" href="index.html#crear"><i class='bx bx-pencil'></i><span>Crear publicación</span></a>
+      <a class="nav-item" data-view="mis-publicaciones" href="index.html#mis-publicaciones"><i class='bx bx-folder-open'></i><span>Mis publicaciones</span></a>
+
+      <h4 class="nav-section">Comunicación</h4>
+      <a class="nav-item" data-view="mensajes" href="index.html#mensajes"><i class='bx bx-message-square-dots'></i><span>Mensajes</span><span class="badge" id="badgeMsg" hidden>0</span></a>
+
+      <h4 class="nav-section">Social / Comunidad</h4>
+      <a class="nav-item active" href="favoritos.html"><i class='bx bx-heart'></i><span>Favoritos</span></a>
+      <a class="nav-item" data-view="destacados" href="index.html#destacados"><i class='bx bx-star'></i><span>Emprendimientos</span></a>
+      
+      <h4 class="nav-section">Eventos UVG</h4>
+      <a class="nav-item" data-view="eventos" href="index.html#eventos"><i class='bx bx-calendar-event'></i><span>Ferias y eventos</span></a>
+
+      <h4 class="nav-section">Cuenta</h4>
+      
+      <a class="nav-item" data-view="salir" href="#"><i class='bx bx-log-out'></i><span>Salir</span></a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="icon-btn" title="Ayuda"><i class='bx bx-help-circle'></i></button>
+    </div>
+  </aside>
+
+  <!-- PÁGINA -->
+  <div class="page">
+
+    <!-- TOPBAR (UP)-->
+    <header class="topbar">
+      <div class="left">
+        <div class="search">
+          <i class='bx bx-search'></i>
+          <input id="searchInput" type="text" placeholder="Buscar en favoritos" aria-label="Buscar">
+        </div>
+      </div>
+      <div class="right">
+        <button id="btnProfile" class="icon-btn" title="Perfil"><i class='bx bx-user'></i></button>
+        <button class="icon-btn" title="Lista"><i class='bx bx-list-ul'></i></button>
+        <button class="icon-btn" title="Panel"><i class='bx bx-layout'></i></button>
+      </div>
+    </header>
+
+    <!-- CONTENIDO -->
+    <main class="content">
+      <section class="section">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+          <h2 class="section-title" style="margin: 0;">❤️ Mis Favoritos</h2>
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <span id="favCount" style="font-size: 14px; color: var(--muted);">0 productos</span>
+            <button id="clearAllFavs" class="icon-btn" title="Limpiar todos los favoritos" style="display: none;">
+              <i class='bx bx-trash'></i>
+            </button>
+          </div>
+        </div>
+        <p class="muted">Productos que has marcado como favoritos</p>
+        
+        <!-- Grid de productos favoritos -->
+        <div id="gridFavorites" class="card-grid"></div>
+        
+        <!-- Estado vacío (se muestra cuando no hay favoritos) -->
+        <div id="emptyState" class="empty-state" style="display: none;">
+          <i class='bx bx-heart-circle'></i>
+          <h3>No tienes productos favoritos aún</h3>
+          <p>Explora productos y marca tus favoritos haciendo clic en el ❤️</p>
+          <a href="index.html" style="display: inline-block; margin-top: 20px; padding: 12px 24px; background: var(--accent); color: #fff; border-radius: 12px; text-decoration: none; font-weight: 600;">
+            Explorar productos
+          </a>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- MODAL DE PRODUCTO / PRODUCT MODAL -->
+  <div id="productModal" class="modal" aria-hidden="true" role="dialog" aria-labelledby="productTitle">
+    <div class="modal-dialog modal-product">
+      <button class="modal-close" data-close="product" aria-label="Cerrar"><i class='bx bx-x'></i></button>
+      
+      <div class="product-modal-content">
+        <!-- Imagen del producto -->
+        <div class="product-modal-image">
+          <img id="productModalImg" src="" alt="Producto">
+        </div>
+        
+        <!-- Información del producto -->
+        <div class="product-modal-body">
+          <!-- Título y botón de favoritos -->
+          <div class="product-modal-header">
+            <h2 id="productModalTitle" class="product-modal-title">Título del producto</h2>
+            <button id="productModalFavBtn" class="fav-btn" aria-label="Agregar a favoritos" title="Agregar a favoritos">
+              <i class='bx bx-heart'></i>
+            </button>
+          </div>
+          
+          <!-- Precio -->
+          <div class="product-modal-price">
+            <span id="productModalPrice">Q0</span>
+          </div>
+          
+          <!-- Descripción -->
+          <div class="product-modal-section">
+            <h3>Descripción</h3>
+            <p id="productModalDesc">Descripción del producto</p>
+          </div>
+          
+          <!-- Estado/Condición -->
+          <div class="product-modal-section">
+            <h3>Estado</h3>
+            <p id="productModalCondition">Nuevo</p>
+          </div>
+          
+          <!-- Ubicación y Categoría -->
+          <div class="product-modal-meta">
+            <div class="meta-item">
+              <i class='bx bx-map'></i>
+              <span id="productModalCity">Ciudad</span>
+            </div>
+            <div class="meta-item">
+              <i class='bx bx-category'></i>
+              <span id="productModalCategory">Categoría</span>
+            </div>
+          </div>
+          
+          <!-- Botón de contacto -->
+          <div class="product-modal-actions">
+            <a id="productModalContact" href="#" class="btn-contact" target="_blank" rel="noopener noreferrer">
+              <i class='bx bxl-whatsapp'></i>
+              <span>Contactar vendedor</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOGIN MODAL -->
+  <div id="loginModal" class="modal" aria-hidden="true" role="dialog" aria-labelledby="loginTitle">
+    <div class="modal-dialog">
+      <button class="modal-close" data-close="login" aria-label="Cerrar"><i class='bx bx-x'></i></button>
+      <div class="login-wrapper">
+        <form id="loginForm" novalidate>
+          <h1 id="loginTitle">Login</h1>
+
+          <div class="input-box">
+            <input type="text" id="username" name="username" placeholder="Username" autocomplete="username" required>
+            <i class='bx bxs-user'></i>
+          </div>
+
+          <div class="input-box">
+            <input type="password" id="password" name="password" placeholder="Password" autocomplete="current-password" required minlength="6">
+            <i class='bx bxs-lock-alt'></i>
+          </div>
+
+          <div class="remember-forgot">
+            <label><input type="checkbox" id="remember"> Remember me</label>
+            <a href="#" class="muted">Forgot Password?</a>
+          </div>
+
+          <button type="submit" class="btn">Login</button>
+
+          <div class="register-link">
+            <p>Don't have an account? <a href="#">Register</a></p>
+          </div>
+
+          <p class="msg" id="msg" aria-live="polite"></p>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- JS -->
+  <script src="favoritos.js"></script>
+</body>
+</html>
