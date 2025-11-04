@@ -9,125 +9,44 @@ const $ = (s) => document.querySelector(s);
 const $$ = (s) => document.querySelectorAll(s);
 
 // ========================================
-// GESTIÓN DE FAVORITOS / FAVORITES MANAGEMENT
+// API HELPERS
 // ========================================
-const FAVORITES_KEY = 'rigocompra_favorites';
+const API_URL = 'http://localhost:5000/api';
 
-function getFavorites() {
-  const favs = localStorage.getItem(FAVORITES_KEY);
-  return favs ? JSON.parse(favs) : [];
-}
+const getProducts = async () => {
+  const response = await fetch(`${API_URL}/products`);
+  return response.json();
+};
 
-function saveFavorites(favorites) {
-  localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
-}
-
-function isFavorite(productId) {
-  const favorites = getFavorites();
-  return favorites.includes(productId);
-}
-
-function toggleFavorite(productId) {
-  let favorites = getFavorites();
-  if (favorites.includes(productId)) {
-    favorites = favorites.filter(id => id !== productId);
-  } else {
-    favorites.push(productId);
-  }
-  saveFavorites(favorites);
-  updateFavoriteButtons(productId);
-  
-  // Actualizar la vista de favoritos
-  loadFavorites();
-  
-  return favorites.includes(productId);
-}
-
-function clearAllFavorites() {
-  if (confirm('¿Estás seguro de que quieres eliminar todos tus favoritos?')) {
-    localStorage.removeItem(FAVORITES_KEY);
-    loadFavorites();
-  }
-}
-
-function updateFavoriteButtons(productId) {
-  const isNowFav = isFavorite(productId);
-  $$(`[data-product-id="${productId}"]`).forEach(btn => {
-    btn.classList.toggle('active', isNowFav);
-    btn.setAttribute('aria-label', isNowFav ? 'Quitar de favoritos' : 'Agregar a favoritos');
-    btn.title = isNowFav ? 'Quitar de favoritos' : 'Agregar a favoritos';
+const getFavorites = async () => {
+  const token = localStorage.getItem('token');
+  if (!token) return [];
+  const response = await fetch(`${API_URL}/favorites`, {
+    headers: { 'x-auth-token': token }
   });
-}
+  return response.json();
+};
 
-// ========================================
-// DATOS DE PRODUCTOS / PRODUCT DATA
-// ========================================
-// EDITAR AQUÍ: Debe coincidir con los datos de app.js
-// En una aplicación real, estos datos vendrían de una API o base de datos
-
-const mine = [
-  { 
-    id: '1', 
-    title: "Bicicleta urbana", 
-    price: 650, 
-    city: "Guatemala", 
-    category: "Ropa", 
-    image: "", 
-    description: "Bicicleta de montaña en excelente estado, perfecta para la ciudad. Incluye casco y candado.", 
-    condition: "Usado - Como nuevo" 
-  },
-  { 
-    id: '2', 
-    title: "Silla gamer", 
-    price: 950, 
-    city: "Mixco", 
-    category: "Hogar", 
-    image: "", 
-    description: "Silla gamer reclinable con soporte lumbar. Muy cómoda para largas sesiones de trabajo o juego.", 
-    condition: "Usado - Buen estado" 
+const toggleFavorite = async (productId) => {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    alert('Please log in to manage favorites');
+    return;
   }
-];
+  await fetch(`${API_URL}/favorites`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-auth-token': token
+    },
+    body: JSON.stringify({ productId })
+  });
+  loadFavorites();
+};
 
-const feed = [
-  { 
-    id: '3', 
-    title: "Brownie casero", 
-    price: 15, 
-    city: "Guatemala", 
-    category: "Comida", 
-    image: "", 
-    description: "Brownies artesanales hechos con chocolate belga. Receta familiar transmitida por generaciones.", 
-    condition: "Nuevo" 
-  },
-  { 
-    id: '4', 
-    title: "Arduino UNO", 
-    price: 180, 
-    city: "Mixco", 
-    category: "Tecnología", 
-    image: "", 
-    description: "Arduino UNO R3 original. Perfecto para proyectos de electrónica y robótica. Incluye cable USB.", 
-    condition: "Nuevo" 
-  },
-  { 
-    id: '5', 
-    title: "Cojín artesanal", 
-    price: 90, 
-    city: "Guatemala", 
-    category: "Hogar", 
-    image: "", 
-    description: "Cojín decorativo hecho a mano con telas guatemaltecas. Diseño único y colorido.", 
-    condition: "Nuevo" 
-  }
-];
-
-const allProducts = [...mine, ...feed];
-
-// Crear un mapa de productos por ID para acceso rápido
-const productsMap = new Map();
-allProducts.forEach(product => {
-  productsMap.set(product.id, product);
-});
+let allProducts = [];
+let userFavorites = [];
+let productsMap = new Map();
 
 // ========================================
 // MODAL DE PRODUCTO / PRODUCT MODAL
@@ -138,7 +57,6 @@ let currentProduct = null;
 function openProductModal(product) {
   currentProduct = product;
   
-  // Actualizar contenido del modal
   $('#productModalTitle').textContent = product.title;
   $('#productModalPrice').textContent = `Q${Number(product.price).toLocaleString('es-GT')}`;
   $('#productModalDesc').textContent = product.description || 'Sin descripción';
@@ -146,7 +64,6 @@ function openProductModal(product) {
   $('#productModalCity').textContent = product.city;
   $('#productModalCategory').textContent = product.category;
   
-  // Configurar imagen
   const imgEl = $('#productModalImg');
   const imgContainer = imgEl.parentElement;
   if (product.image) {
@@ -158,17 +75,14 @@ function openProductModal(product) {
     imgContainer.classList.add('placeholder');
   }
   
-  // Configurar botón de contacto (WhatsApp)
-  const phone = '50212345678'; // EDITAR AQUÍ: Número de WhatsApp
+  const phone = '50212345678';
   const message = encodeURIComponent(`Hola! Me interesa ${product.title} por Q${product.price}`);
   $('#productModalContact').href = `https://wa.me/${phone}?text=${message}`;
   
-  // Actualizar botón de favoritos
   const favBtn = $('#productModalFavBtn');
-  favBtn.classList.toggle('active', isFavorite(product.id));
+  favBtn.classList.toggle('active', userFavorites.includes(product.id));
   favBtn.setAttribute('data-product-id', product.id);
   
-  // Abrir modal
   open(productModal);
 }
 
@@ -177,7 +91,6 @@ function closeProductModal() {
   currentProduct = null;
 }
 
-// Event listener para botón de favoritos en modal
 $('#productModalFavBtn').addEventListener('click', (e) => {
   e.stopPropagation();
   if (currentProduct) {
@@ -193,30 +106,26 @@ function createCard(item) {
   card.className = 'card';
   card.setAttribute('data-product-id', item.id);
   
-  // Media (imagen)
   const media = document.createElement('div');
   media.className = 'card-media ' + (item.image ? '' : 'placeholder');
   if (item.image) { 
     media.style.background = `center/cover no-repeat url('${item.image}')`; 
   }
   
-  // Botón de favoritos en la card
   const favBtn = document.createElement('button');
-  favBtn.className = 'card-fav-btn active'; // Siempre activo en la página de favoritos
+  favBtn.className = 'card-fav-btn active';
   favBtn.setAttribute('data-product-id', item.id);
   favBtn.setAttribute('aria-label', 'Quitar de favoritos');
   favBtn.title = 'Quitar de favoritos';
   favBtn.innerHTML = '<i class="bx bx-heart"></i>';
   
-  // Event listener para el botón de favoritos
   favBtn.addEventListener('click', (e) => {
-    e.stopPropagation(); // Evitar que se abra el modal
+    e.stopPropagation();
     toggleFavorite(item.id);
   });
   
   media.appendChild(favBtn);
   
-  // Body
   const body = document.createElement('div');
   body.className = 'card-body';
   body.innerHTML = `
@@ -228,9 +137,7 @@ function createCard(item) {
       <span>• ${item.category}</span>
     </div>`;
   
-  // Event listener para abrir modal al hacer clic en la card
   card.addEventListener('click', (e) => {
-    // Solo abrir modal si no se hizo clic en el botón de favoritos
     if (!e.target.closest('.card-fav-btn')) {
       openProductModal(item);
     }
@@ -243,19 +150,19 @@ function createCard(item) {
 // ========================================
 // CARGAR FAVORITOS / LOAD FAVORITES
 // ========================================
-function loadFavorites(searchQuery = '') {
-  const favoriteIds = getFavorites();
+async function loadFavorites(searchQuery = '') {
+  allProducts = await getProducts();
+  allProducts.forEach(p => productsMap.set(p.id, p));
+  userFavorites = await getFavorites();
+
   const gridFavorites = $('#gridFavorites');
   const emptyState = $('#emptyState');
   const favCount = $('#favCount');
-  const clearBtn = $('#clearAllFavs');
   
-  // Obtener productos favoritos
-  let favoriteProducts = favoriteIds
+  let favoriteProducts = userFavorites
     .map(id => productsMap.get(id))
     .filter(product => product !== undefined);
   
-  // Aplicar filtro de búsqueda si existe
   if (searchQuery) {
     const q = searchQuery.toLowerCase();
     favoriteProducts = favoriteProducts.filter(product => 
@@ -264,41 +171,12 @@ function loadFavorites(searchQuery = '') {
     );
   }
   
-  // Actualizar contador
-  const totalFavs = getFavorites().length;
-  favCount.textContent = `${totalFavs} producto${totalFavs !== 1 ? 's' : ''}`;
+  favCount.textContent = `${userFavorites.length} producto${userFavorites.length !== 1 ? 's' : ''}`;
   
-  // Mostrar/ocultar botón de limpiar
-  if (totalFavs > 0) {
-    clearBtn.style.display = 'grid';
-  } else {
-    clearBtn.style.display = 'none';
-  }
-  
-  // Mostrar productos o estado vacío
   if (favoriteProducts.length === 0) {
     gridFavorites.innerHTML = '';
     gridFavorites.style.display = 'none';
     emptyState.style.display = 'block';
-    
-    if (searchQuery && totalFavs > 0) {
-      // Si hay búsqueda pero no resultados
-      emptyState.innerHTML = `
-        <i class='bx bx-search-alt'></i>
-        <h3>No se encontraron resultados</h3>
-        <p>Intenta con otros términos de búsqueda</p>
-      `;
-    } else {
-      // Si no hay favoritos
-      emptyState.innerHTML = `
-        <i class='bx bx-heart-circle'></i>
-        <h3>No tienes productos favoritos aún</h3>
-        <p>Explora productos y marca tus favoritos haciendo clic en el ❤️</p>
-        <a href="index.html" style="display: inline-block; margin-top: 20px; padding: 12px 24px; background: var(--accent); color: #fff; border-radius: 12px; text-decoration: none; font-weight: 600;">
-          Explorar productos
-        </a>
-      `;
-    }
   } else {
     gridFavorites.innerHTML = '';
     gridFavorites.style.display = 'grid';
@@ -319,11 +197,6 @@ searchInput.addEventListener('input', () => {
 });
 
 // ========================================
-// LIMPIAR TODOS LOS FAVORITOS / CLEAR ALL FAVORITES
-// ========================================
-$('#clearAllFavs').addEventListener('click', clearAllFavorites);
-
-// ========================================
 // MODALES / MODALS
 // ========================================
 const loginModal = $('#loginModal');
@@ -340,10 +213,8 @@ const close = (el) => {
   document.body.style.overflow = '';
 };
 
-// Event listeners para abrir modales
 $('#btnProfile').addEventListener('click', () => open(loginModal));
 
-// Event listeners para cerrar modales
 $$('.modal-close').forEach(btn => {
   btn.addEventListener('click', (e) => {
     const which = e.currentTarget.dataset.close;
@@ -352,14 +223,12 @@ $$('.modal-close').forEach(btn => {
   });
 });
 
-// Cerrar al hacer clic fuera del modal
 [loginModal, productModal].forEach(m => 
   m.addEventListener('click', e => { 
     if (e.target === m) close(m); 
   })
 );
 
-// Cerrar con tecla ESC
 window.addEventListener('keydown', e => { 
   if (e.key === 'Escape') { 
     close(loginModal);
@@ -368,32 +237,62 @@ window.addEventListener('keydown', e => {
 });
 
 // ========================================
-// LOGIN DEMO
+// LOGIN & REGISTER
 // ========================================
 const loginForm = $('#loginForm');
 const msg = $('#msg');
+const registerLink = $('.register-link a');
+const loginTitle = $('#loginTitle');
+
+let isRegister = false;
+
+registerLink.addEventListener('click', (e) => {
+  e.preventDefault();
+  isRegister = !isRegister;
+  loginTitle.textContent = isRegister ? 'Register' : 'Login';
+  registerLink.innerHTML = isRegister ? `Already have an account? <a href="#">Login</a>` : `Don't have an account? <a href="#">Register</a>`;
+});
 
 loginForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   msg.textContent = '';
   
-  const u = loginForm.username.value.trim();
-  const p = loginForm.password.value.trim();
+  const username = loginForm.username.value.trim();
+  const password = loginForm.password.value.trim();
   
-  if (!u || !p) { 
+  if (!username || !password) {
     msg.textContent = 'Completa usuario y contraseña.'; 
     return; 
   }
   
-  await new Promise(r => setTimeout(r, 350));
+  const url = isRegister ? `${API_URL}/auth/register` : `${API_URL}/auth/login`;
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, password })
+  });
   
-  if (u === 'admin' && p === 'admin123') { 
-    msg.textContent = 'Login exitoso ✅'; 
-    msg.classList.add('ok'); 
-    setTimeout(() => close(loginModal), 600); 
-  } else { 
-    msg.textContent = 'Credenciales inválidas'; 
-    msg.classList.remove('ok'); 
+  const data = await response.json();
+
+  if (response.ok) {
+    if (isRegister) {
+      msg.textContent = 'Registration successful! Please log in.';
+      msg.classList.add('ok');
+      isRegister = false;
+      loginTitle.textContent = 'Login';
+      registerLink.innerHTML = `Don't have an account? <a href="#">Register</a>`;
+    } else {
+      localStorage.setItem('token', data.token);
+      msg.textContent = 'Login exitoso ✅';
+      msg.classList.add('ok');
+      setTimeout(() => {
+        close(loginModal);
+        loadFavorites();
+      }, 600);
+    }
+  } else {
+    msg.textContent = data.msg;
+    msg.classList.remove('ok');
   }
 });
 
@@ -401,6 +300,3 @@ loginForm.addEventListener('submit', async (e) => {
 // INICIALIZACIÓN / INITIALIZATION
 // ========================================
 loadFavorites();
-
-console.log('❤️ Página de Favoritos inicializada');
-console.log('⭐ Favoritos guardados:', getFavorites().length);
