@@ -259,18 +259,25 @@ loginForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   loginMsg.textContent = '';
   
-  const email = $('#loginEmail').value.trim();
+  const nombre_usuario = $('#loginUsername').value.trim();
   const password = $('#loginPassword').value.trim();
   
-  if (!email || !password) {
-    loginMsg.textContent = 'Completa email y contraseña.';
+  if (!nombre_usuario || !password) {
+    loginMsg.textContent = 'Completa todos los campos.';
     return; 
   }
-  
+
+  const isPin = /^\d{4}$/.test(password);
+
+  const body = {
+    nombre_usuario,
+    [isPin ? 'codigo_pin' : 'password']: password
+  };
+
   const response = await fetch(`${API_URL}/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password })
+    body: JSON.stringify(body)
   });
   
   const data = await response.json();
@@ -289,23 +296,49 @@ loginForm.addEventListener('submit', async (e) => {
   }
 });
 
+const authMethodRadios = $$('input[name="authMethod"]');
+authMethodRadios.forEach(radio => {
+  radio.addEventListener('change', () => {
+    if (radio.value === 'password') {
+      $('#password-field').style.display = 'block';
+      $('#pin-field').style.display = 'none';
+    } else {
+      $('#password-field').style.display = 'none';
+      $('#pin-field').style.display = 'block';
+    }
+  });
+});
+
 registerForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   registerMsg.textContent = '';
 
-  const name = $('#registerName').value.trim();
-  const email = $('#registerEmail').value.trim();
-  const password = $('#registerPassword').value.trim();
+  const nombre_usuario = $('#registerUsername').value.trim();
+  const authMethod = $('input[name="authMethod"]:checked').value;
+  let password = null;
+  let codigo_pin = null;
 
-  if (!name || !email || !password) {
+  if (authMethod === 'password') {
+    password = $('#registerPassword').value.trim();
+  } else {
+    codigo_pin = $('#registerPin').value.trim();
+  }
+
+  if (!nombre_usuario || (authMethod === 'password' && !password) || (authMethod === 'pin' && !codigo_pin)) {
     registerMsg.textContent = 'Completa todos los campos.';
     return;
   }
 
+  const body = {
+    nombre_usuario,
+    password,
+    codigo_pin
+  };
+
   const response = await fetch(`${API_URL}/auth/register`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name, email, password })
+    body: JSON.stringify(body)
   });
 
   const data = await response.json();

@@ -184,6 +184,13 @@ body{
 .msg{ text-align:center; min-height:18px; font-size:14px; color:#d92c20; margin-top:6px; }
 .msg.ok{ color:#1a7f37; }
 
+.auth-method {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin: 20px 0;
+}
+
 .separator {
   text-align: center;
   margin: 20px 0;

@@ -14,6 +14,15 @@ const getProducts = async () => {
   return response.json();
 };
 
+const getMyProducts = async () => {
+  const token = localStorage.getItem('token');
+  if (!token) return [];
+  const response = await fetch(`${API_URL}/products/mine`, {
+    headers: { 'x-auth-token': token }
+  });
+  return response.json();
+};
+
 const getFavorites = async () => {
   const token = localStorage.getItem('token');
   if (!token) return [];
@@ -219,6 +228,16 @@ $$('.chip').forEach(chip => {
   });
 });
 
+const searchInput = $('#searchInput');
+searchInput.addEventListener('input', () => {
+  const q = searchInput.value.trim().toLowerCase();
+  const f = (it) => [it.title, it.city, it.category, it.description]
+    .some(v => (v || '').toLowerCase().includes(q));
+
+  renderList(allProducts.filter(f), '#gridFeed');
+  renderList(allProducts.filter(f), '#gridCategorias');
+});
+
 // ========================================
 // MODALES: LOGIN / REGISTER / CREAR / PRODUCTO
 // ========================================
@@ -288,23 +307,30 @@ const registerMsg = $('#registerMsg');
 loginForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   loginMsg.textContent = '';
-  
-  const email = $('#loginEmail').value.trim();
+
+  const nombre_usuario = $('#loginUsername').value.trim();
   const password = $('#loginPassword').value.trim();
-  
-  if (!email || !password) {
-    loginMsg.textContent = 'Completa email y contraseña.';
-    return; 
+
+  if (!nombre_usuario || !password) {
+    loginMsg.textContent = 'Completa todos los campos.';
+    return;
   }
-  
+
+  const isPin = /^\d{4}$/.test(password);
+
+  const body = {
+    nombre_usuario,
+    [isPin ? 'codigo_pin' : 'password']: password
+  };
+
   const response = await fetch(`${API_URL}/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password })
+    body: JSON.stringify(body)
   });
 
   const data = await response.json();
-  
+
   if (response.ok) {
     localStorage.setItem('token', data.token);
     loginMsg.textContent = 'Login exitoso ✅';
@@ -319,23 +345,49 @@ loginForm.addEventListener('submit', async (e) => {
   }
 });
 
+const authMethodRadios = $$('input[name="authMethod"]');
+authMethodRadios.forEach(radio => {
+  radio.addEventListener('change', () => {
+    if (radio.value === 'password') {
+      $('#password-field').style.display = 'block';
+      $('#pin-field').style.display = 'none';
+    } else {
+      $('#password-field').style.display = 'none';
+      $('#pin-field').style.display = 'block';
+    }
+  });
+});
+
 registerForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   registerMsg.textContent = '';
 
-  const name = $('#registerName').value.trim();
-  const email = $('#registerEmail').value.trim();
-  const password = $('#registerPassword').value.trim();
+  const nombre_usuario = $('#registerUsername').value.trim();
+  const authMethod = $('input[name="authMethod"]:checked').value;
+  let password = null;
+  let codigo_pin = null;
 
-  if (!name || !email || !password) {
+  if (authMethod === 'password') {
+    password = $('#registerPassword').value.trim();
+  } else {
+    codigo_pin = $('#registerPin').value.trim();
+  }
+
+  if (!nombre_usuario || (authMethod === 'password' && !password) || (authMethod === 'pin' && !codigo_pin)) {
     registerMsg.textContent = 'Completa todos los campos.';
     return;
   }
 
+  const body = {
+    nombre_usuario,
+    password,
+    codigo_pin
+  };
+
   const response = await fetch(`${API_URL}/auth/register`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name, email, password })
+    body: JSON.stringify(body)
   });
 
   const data = await response.json();
@@ -414,12 +466,16 @@ async function loadApp() {
   allProducts = await getProducts();
   if (localStorage.getItem('token')) {
     userFavorites = await getFavorites();
+    const myProducts = await getMyProducts();
+    renderList(myProducts, '#gridMine');
+    renderList(myProducts, '#gridMineOnly');
+  } else {
+    renderList([], '#gridMine');
+    renderList([], '#gridMineOnly');
   }
 
   renderList(allProducts, '#gridFeed');
   renderList(allProducts, '#gridCategorias');
-  renderList([], '#gridMine');
-  renderList([], '#gridMineOnly');
 
   if(localStorage.getItem('token')) {
     $('#btnProfile').innerHTML = `<i class='bx bxs-user'></i>`;

@@ -11,9 +11,9 @@ const db = new sqlite3.Database(DBSOURCE, (err) => {
     db.serialize(() => {
       db.run(`CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT,
-        email TEXT UNIQUE,
-        password TEXT
+        nombre_usuario TEXT UNIQUE,
+        password_hash TEXT,
+        codigo_pin_hash TEXT
       )`);
       db.run(`CREATE TABLE IF NOT EXISTS products (
         id TEXT PRIMARY KEY,
@@ -23,7 +23,9 @@ const db = new sqlite3.Database(DBSOURCE, (err) => {
         category TEXT,
         image TEXT,
         description TEXT,
-        condition TEXT
+        condition TEXT,
+        user_id INTEGER,
+        FOREIGN KEY(user_id) REFERENCES users(id)
       )`, (err) => {
         if (err) {
           console.error(err.message);
