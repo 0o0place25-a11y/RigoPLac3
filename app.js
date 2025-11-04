@@ -5,35 +5,50 @@ const $ = (s) => document.querySelector(s);
 const $$ = (s) => document.querySelectorAll(s);
 
 // ========================================
+// API HELPERS
+// ========================================
+const API_URL = 'http://localhost:5000/api';
+
+const getProducts = async () => {
+  const response = await fetch(`${API_URL}/products`);
+  return response.json();
+};
+
+const getFavorites = async () => {
+  const token = localStorage.getItem('token');
+  if (!token) return [];
+  const response = await fetch(`${API_URL}/favorites`, {
+    headers: { 'x-auth-token': token }
+  });
+  return response.json();
+};
+
+const toggleFavorite = async (productId) => {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    alert('Please log in to manage favorites');
+    return;
+  }
+  await fetch(`${API_URL}/favorites`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-auth-token': token
+    },
+    body: JSON.stringify({ productId })
+  });
+  loadApp();
+};
+
+let allProducts = [];
+let userFavorites = [];
+
+// ========================================
 // GESTIÓN DE FAVORITOS / FAVORITES MANAGEMENT
 // ========================================
-// Sistema de favoritos usando localStorage
-const FAVORITES_KEY = 'rigocompra_favorites';
-
-function getFavorites() {
-  const favs = localStorage.getItem(FAVORITES_KEY);
-  return favs ? JSON.parse(favs) : [];
-}
-
-function saveFavorites(favorites) {
-  localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
-}
 
 function isFavorite(productId) {
-  const favorites = getFavorites();
-  return favorites.includes(productId);
-}
-
-function toggleFavorite(productId) {
-  let favorites = getFavorites();
-  if (favorites.includes(productId)) {
-    favorites = favorites.filter(id => id !== productId);
-  } else {
-    favorites.push(productId);
-  }
-  saveFavorites(favorites);
-  updateFavoriteButtons(productId);
-  return favorites.includes(productId);
+  return userFavorites.includes(productId);
 }
 
 function updateFavoriteButtons(productId) {
@@ -46,71 +61,6 @@ function updateFavoriteButtons(productId) {
 }
 
 // ========================================
-// DATOS DE PRODUCTOS / PRODUCT DATA
-// ========================================
-// EDITAR AQUÍ: Información de productos
-// Puedes agregar, eliminar o modificar productos
-// Campos disponibles: id, title, price, city, category, image, description, condition
-
-const mine = [
-  { 
-    id: '1', 
-    title: "Bicicleta urbana", 
-    price: 650, 
-    city: "Guatemala", 
-    category: "Ropa", 
-    image: "", 
-    description: "Bicicleta de montaña en excelente estado, perfecta para la ciudad. Incluye casco y candado.", 
-    condition: "Usado - Como nuevo" 
-  },
-  { 
-    id: '2', 
-    title: "Silla gamer", 
-    price: 950, 
-    city: "Mixco", 
-    category: "Hogar", 
-    image: "", 
-    description: "Silla gamer reclinable con soporte lumbar. Muy cómoda para largas sesiones de trabajo o juego.", 
-    condition: "Usado - Buen estado" 
-  }
-];
-
-const feed = [
-  { 
-    id: '3', 
-    title: "Brownie casero", 
-    price: 15, 
-    city: "Guatemala", 
-    category: "Comida", 
-    image: "", 
-    description: "Brownies artesanales hechos con chocolate belga. Receta familiar transmitida por generaciones.", 
-    condition: "Nuevo" 
-  },
-  { 
-    id: '4', 
-    title: "Arduino UNO", 
-    price: 180, 
-    city: "Mixco", 
-    category: "Tecnología", 
-    image: "", 
-    description: "Arduino UNO R3 original. Perfecto para proyectos de electrónica y robótica. Incluye cable USB.", 
-    condition: "Nuevo" 
-  },
-  { 
-    id: '5', 
-    title: "Cojín artesanal", 
-    price: 90, 
-    city: "Guatemala", 
-    category: "Hogar", 
-    image: "", 
-    description: "Cojín decorativo hecho a mano con telas guatemaltecas. Diseño único y colorido.", 
-    condition: "Nuevo" 
-  }
-];
-
-const all = [...mine, ...feed];
-
-// ========================================
 // MODAL DE PRODUCTO / PRODUCT MODAL
 // ========================================
 const productModal = $('#productModal');
@@ -119,7 +69,6 @@ let currentProduct = null;
 function openProductModal(product) {
   currentProduct = product;
   
-  // Actualizar contenido del modal
   $('#productModalTitle').textContent = product.title;
   $('#productModalPrice').textContent = `Q${Number(product.price).toLocaleString('es-GT')}`;
   $('#productModalDesc').textContent = product.description || 'Sin descripción';
@@ -127,7 +76,6 @@ function openProductModal(product) {
   $('#productModalCity').textContent = product.city;
   $('#productModalCategory').textContent = product.category;
   
-  // Configurar imagen
   const imgEl = $('#productModalImg');
   const imgContainer = imgEl.parentElement;
   if (product.image) {
@@ -139,17 +87,14 @@ function openProductModal(product) {
     imgContainer.classList.add('placeholder');
   }
   
-  // Configurar botón de contacto (WhatsApp)
-  const phone = '50212345678'; // EDITAR AQUÍ: Número de WhatsApp
+  const phone = '50212345678';
   const message = encodeURIComponent(`Hola! Me interesa ${product.title} por Q${product.price}`);
   $('#productModalContact').href = `https://wa.me/${phone}?text=${message}`;
   
-  // Actualizar botón de favoritos
   const favBtn = $('#productModalFavBtn');
   favBtn.classList.toggle('active', isFavorite(product.id));
   favBtn.setAttribute('data-product-id', product.id);
   
-  // Abrir modal
   open(productModal);
 }
 
@@ -158,7 +103,6 @@ function closeProductModal() {
   currentProduct = null;
 }
 
-// Event listener para botón de favoritos en modal
 $('#productModalFavBtn').addEventListener('click', (e) => {
   e.stopPropagation();
   if (currentProduct) {
@@ -174,14 +118,12 @@ function createCard(item) {
   card.className = 'card';
   card.setAttribute('data-product-id', item.id);
   
-  // Media (imagen)
   const media = document.createElement('div');
   media.className = 'card-media ' + (item.image ? '' : 'placeholder');
   if (item.image) { 
     media.style.background = `center/cover no-repeat url('${item.image}')`; 
   }
   
-  // Botón de favoritos en la card
   const favBtn = document.createElement('button');
   favBtn.className = 'card-fav-btn';
   favBtn.setAttribute('data-product-id', item.id);
@@ -189,15 +131,13 @@ function createCard(item) {
   favBtn.innerHTML = '<i class="bx bx-heart"></i>';
   favBtn.classList.toggle('active', isFavorite(item.id));
   
-  // Event listener para el botón de favoritos
   favBtn.addEventListener('click', (e) => {
-    e.stopPropagation(); // Evitar que se abra el modal
+    e.stopPropagation();
     toggleFavorite(item.id);
   });
   
   media.appendChild(favBtn);
   
-  // Body
   const body = document.createElement('div');
   body.className = 'card-body';
   body.innerHTML = `
@@ -209,9 +149,7 @@ function createCard(item) {
       <span>• ${item.category}</span>
     </div>`;
   
-  // Event listener para abrir modal al hacer clic en la card
   card.addEventListener('click', (e) => {
-    // Solo abrir modal si no se hizo clic en el botón de favoritos
     if (!e.target.closest('.card-fav-btn')) {
       openProductModal(item);
     }
@@ -227,7 +165,6 @@ function renderList(list, sel) {
   el.innerHTML = '';
   
   if (list.length === 0) {
-    // Mostrar mensaje cuando no hay productos
     el.innerHTML = `
       <div class="empty-state">
         <i class='bx bx-package'></i>
@@ -239,30 +176,6 @@ function renderList(list, sel) {
   
   list.forEach(i => el.appendChild(createCard(i)));
 }
-
-// ========================================
-// RENDER INICIAL / INITIAL RENDER
-// ========================================
-renderList(mine, '#gridMine');
-renderList(feed, '#gridFeed');
-renderList(all, '#gridExplorar');
-renderList(all, '#gridCategorias');
-renderList(mine, '#gridMineOnly');
-
-// ========================================
-// BÚSQUEDA / SEARCH
-// ========================================
-const searchInput = $('#searchInput');
-searchInput.addEventListener('input', () => {
-  const q = searchInput.value.trim().toLowerCase();
-  const f = (it) => [it.title, it.city, it.category, it.description]
-    .some(v => (v || '').toLowerCase().includes(q));
-  
-  renderList(mine.filter(f), '#gridMine');
-  renderList(feed.filter(f), '#gridFeed');
-  renderList(all.filter(f), '#gridExplorar');
-  renderList(all.filter(f), '#gridCategorias');
-});
 
 // ========================================
 // NAVEGACIÓN POR VISTAS / VIEW NAVIGATION
@@ -285,7 +198,8 @@ navItems.forEach(a => {
     e.preventDefault();
     const name = a.dataset.view;
     if (name === 'salir') { 
-      alert('Cerrar sesión (UI)'); 
+      localStorage.removeItem('token');
+      window.location.reload();
       return; 
     }
     showView(name);
@@ -300,7 +214,7 @@ $$('.chip').forEach(chip => {
     $$('.chip').forEach(c => c.classList.remove('active'));
     chip.classList.add('active');
     const cat = chip.dataset.cat;
-    const list = (cat === 'Todos') ? all : all.filter(i => i.category === cat);
+    const list = (cat === 'Todos') ? allProducts : allProducts.filter(i => i.category === cat);
     renderList(list, '#gridCategorias');
   });
 });
@@ -323,18 +237,12 @@ const close = (el) => {
   document.body.style.overflow = '';
 };
 
-// Event listeners para abrir modales
 $('#btnProfile').addEventListener('click', () => open(loginModal));
-$('#btnCrear')?.addEventListener('click', () => { 
-  open(createModal); 
-  setTimeout(() => $('#f_title')?.focus(), 50); 
-});
 $('#navCrear').addEventListener('click', (e) => { 
   e.preventDefault(); 
   open(createModal); 
 });
 
-// Event listeners para cerrar modales
 $$('.modal-close').forEach(btn => {
   btn.addEventListener('click', (e) => {
     const which = e.currentTarget.dataset.close;
@@ -344,14 +252,12 @@ $$('.modal-close').forEach(btn => {
   });
 });
 
-// Cerrar al hacer clic fuera del modal
 [loginModal, createModal, productModal].forEach(m => 
   m.addEventListener('click', e => { 
     if (e.target === m) close(m); 
   })
 );
 
-// Cerrar con tecla ESC
 window.addEventListener('keydown', e => { 
   if (e.key === 'Escape') { 
     close(loginModal); 
@@ -361,32 +267,62 @@ window.addEventListener('keydown', e => {
 });
 
 // ========================================
-// LOGIN DEMO
+// LOGIN & REGISTER
 // ========================================
 const loginForm = $('#loginForm');
 const msg = $('#msg');
+const registerLink = $('.register-link a');
+const loginTitle = $('#loginTitle');
+
+let isRegister = false;
+
+registerLink.addEventListener('click', (e) => {
+  e.preventDefault();
+  isRegister = !isRegister;
+  loginTitle.textContent = isRegister ? 'Register' : 'Login';
+  registerLink.innerHTML = isRegister ? `Already have an account? <a href="#">Login</a>` : `Don't have an account? <a href="#">Register</a>`;
+});
 
 loginForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   msg.textContent = '';
   
-  const u = loginForm.username.value.trim();
-  const p = loginForm.password.value.trim();
+  const username = loginForm.username.value.trim();
+  const password = loginForm.password.value.trim();
   
-  if (!u || !p) { 
+  if (!username || !password) {
     msg.textContent = 'Completa usuario y contraseña.'; 
     return; 
   }
   
-  await new Promise(r => setTimeout(r, 350));
+  const url = isRegister ? `${API_URL}/auth/register` : `${API_URL}/auth/login`;
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, password })
+  });
+
+  const data = await response.json();
   
-  if (u === 'admin' && p === 'admin123') { 
-    msg.textContent = 'Login exitoso ✅'; 
-    msg.classList.add('ok'); 
-    setTimeout(() => close(loginModal), 600); 
-  } else { 
-    msg.textContent = 'Credenciales inválidas'; 
-    msg.classList.remove('ok'); 
+  if (response.ok) {
+    if (isRegister) {
+      msg.textContent = 'Registration successful! Please log in.';
+      msg.classList.add('ok');
+      isRegister = false;
+      loginTitle.textContent = 'Login';
+      registerLink.innerHTML = `Don't have an account? <a href="#">Register</a>`;
+    } else {
+      localStorage.setItem('token', data.token);
+      msg.textContent = 'Login exitoso ✅';
+      msg.classList.add('ok');
+      setTimeout(() => {
+        close(loginModal);
+        loadApp();
+      }, 600);
+    }
+  } else {
+    msg.textContent = data.msg;
+    msg.classList.remove('ok');
   }
 });
 
@@ -396,10 +332,15 @@ loginForm.addEventListener('submit', async (e) => {
 const createForm = $('#createForm');
 const createMsg = $('#createMsg');
 
-createForm.addEventListener('submit', (e) => {
+createForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   
-  // EDITAR AQUÍ: Validación y creación de nuevos productos
+  const token = localStorage.getItem('token');
+  if (!token) {
+    alert('Please log in to create a post');
+    return;
+  }
+
   const item = {
     id: crypto.randomUUID(),
     title: $('#f_title').value.trim(),
@@ -408,7 +349,7 @@ createForm.addEventListener('submit', (e) => {
     category: $('#f_category').value || 'Otros',
     image: $('#f_image').value.trim(),
     description: $('#f_desc').value.trim(),
-    condition: 'Nuevo' // Valor por defecto
+    condition: 'Nuevo'
   };
   
   if (!item.title || !item.price || !item.city || !$('#f_category').value) {
@@ -416,38 +357,47 @@ createForm.addEventListener('submit', (e) => {
     return;
   }
   
-  // Agregar el nuevo producto
-  mine.unshift(item);
-  all.unshift(item);
+  const response = await fetch(`${API_URL}/products`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-auth-token': token
+    },
+    body: JSON.stringify(item)
+  });
   
-  // Re-renderizar las listas
-  renderList(mine, '#gridMine');
-  renderList(mine, '#gridMineOnly');
-  renderList(all, '#gridExplorar');
-  renderList(all, '#gridCategorias');
-  
-  createMsg.textContent = 'Publicado ✅';
-  createMsg.classList.add('ok');
-  createForm.reset();
-  
-  setTimeout(() => { 
-    createMsg.textContent = ''; 
-    close(createModal); 
-  }, 700);
+  if (response.ok) {
+    createMsg.textContent = 'Publicado ✅';
+    createMsg.classList.add('ok');
+    createForm.reset();
+    setTimeout(() => {
+      createMsg.textContent = '';
+      close(createModal);
+      loadApp();
+    }, 700);
+  } else {
+    createMsg.textContent = 'Error creating post';
+  }
 });
 
 // ========================================
-// BADGES DEMO
+// LOAD APP
 // ========================================
-const badgeMsg = $('#badgeMsg');
-if (badgeMsg) { 
-  badgeMsg.textContent = '2'; 
-  badgeMsg.hidden = false; 
+async function loadApp() {
+  allProducts = await getProducts();
+  if (localStorage.getItem('token')) {
+    userFavorites = await getFavorites();
+  }
+
+  // You can decide what to render here, for now, just all products
+  renderList(allProducts, '#gridFeed');
+  renderList(allProducts, '#gridCategorias');
+  renderList([], '#gridMine');
+  renderList([], '#gridMineOnly');
+
+  if(localStorage.getItem('token')) {
+    $('#btnProfile').innerHTML = `<i class='bx bxs-user'></i>`;
+  }
 }
 
-// ========================================
-// CONSOLA DE DESARROLLO / DEV CONSOLE
-// ========================================
-console.log('🛒 RigoCompra! inicializado');
-console.log('📦 Productos cargados:', all.length);
-console.log('⭐ Favoritos guardados:', getFavorites().length);
+loadApp();
