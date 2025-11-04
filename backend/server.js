@@ -27,23 +27,30 @@ const auth = (req, res, next) => {
 
 // Register
 app.post('/api/auth/register', (req, res) => {
-  const { name, email, password } = req.body;
-  if (!name || !email || !password) {
+  const { nombre_usuario, password, codigo_pin } = req.body;
+  if (!nombre_usuario || (!password && !codigo_pin)) {
     return res.status(400).json({ msg: 'Please enter all fields' });
   }
 
   const salt = bcrypt.genSaltSync(10);
-  const hash = bcrypt.hashSync(password, salt);
+  let password_hash = null;
+  let codigo_pin_hash = null;
 
-  db.run('INSERT INTO users (name, email, password) VALUES (?, ?, ?)', [name, email, hash], function(err) {
+  if (password) {
+    password_hash = bcrypt.hashSync(password, salt);
+  }
+  if (codigo_pin) {
+    codigo_pin_hash = bcrypt.hashSync(codigo_pin, salt);
+  }
+
+  db.run('INSERT INTO users (nombre_usuario, password_hash, codigo_pin_hash) VALUES (?, ?, ?)', [nombre_usuario, password_hash, codigo_pin_hash], function(err) {
     if (err) {
-      return res.status(400).json({ msg: 'Email already exists' });
+      return res.status(400).json({ msg: 'Username already exists' });
     }
     res.json({
       user: {
         id: this.lastID,
-        name: name,
-        email: email
+        nombre_usuario: nombre_usuario
       }
     });
   });
@@ -51,17 +58,23 @@ app.post('/api/auth/register', (req, res) => {
 
 // Login
 app.post('/api/auth/login', (req, res) => {
-  const { email, password } = req.body;
-  if (!email || !password) {
+  const { nombre_usuario, password, codigo_pin } = req.body;
+  if (!nombre_usuario || (!password && !codigo_pin)) {
     return res.status(400).json({ msg: 'Please enter all fields' });
   }
 
-  db.get('SELECT * FROM users WHERE email = ?', [email], (err, user) => {
+  db.get('SELECT * FROM users WHERE nombre_usuario = ?', [nombre_usuario], (err, user) => {
     if (err || !user) {
       return res.status(400).json({ msg: 'Invalid credentials' });
     }
 
-    const isMatch = bcrypt.compareSync(password, user.password);
+    let isMatch = false;
+    if (password && user.password_hash) {
+      isMatch = bcrypt.compareSync(password, user.password_hash);
+    } else if (codigo_pin && user.codigo_pin_hash) {
+      isMatch = bcrypt.compareSync(codigo_pin, user.codigo_pin_hash);
+    }
+
     if (!isMatch) {
       return res.status(400).json({ msg: 'Invalid credentials' });
     }
@@ -71,8 +84,7 @@ app.post('/api/auth/login', (req, res) => {
       token,
       user: {
         id: user.id,
-        name: user.name,
-        email: user.email
+        nombre_usuario: user.nombre_usuario
       }
     });
   });
@@ -88,12 +100,21 @@ app.get('/api/products', (req, res) => {
   });
 });
 
+app.get('/api/products/mine', auth, (req, res) => {
+  db.all('SELECT * FROM products WHERE user_id = ?', [req.user.id], (err, rows) => {
+    if (err) {
+      return res.status(500).json({ msg: 'Error retrieving products' });
+    }
+    res.json(rows);
+  });
+});
+
 app.post('/api/products', auth, (req, res) => {
   const { id, title, price, city, category, image, description, condition } = req.body;
   if (!id || !title || !price || !city || !category) {
     return res.status(400).json({ msg: 'Please enter all required fields' });
   }
-  db.run('INSERT INTO products (id, title, price, city, category, image, description, condition) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [id, title, price, city, category, image, description, condition], function(err) {
+  db.run('INSERT INTO products (id, title, price, city, category, image, description, condition, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', [id, title, price, city, category, image, description, condition, req.user.id], function(err) {
     if (err) {
       return res.status(500).json({ msg: 'Error creating product' });
     }

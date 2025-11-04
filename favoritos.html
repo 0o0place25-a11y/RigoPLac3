@@ -164,29 +164,23 @@
       <button class="modal-close" data-close="login" aria-label="Cerrar"><i class='bx bx-x'></i></button>
       <div class="login-wrapper">
         <form id="loginForm" novalidate>
-          <h1 id="loginTitle">Sign In</h1>
+          <h1 id="loginTitle">Iniciar Sesión</h1>
 
           <div class="input-box">
-            <input type="email" id="loginEmail" name="email" placeholder="Email" autocomplete="email" required>
-            <i class='bx bxs-envelope'></i>
+            <input type="text" id="loginUsername" name="username" placeholder="Nombre de usuario" required>
+            <i class='bx bxs-user'></i>
           </div>
 
           <div class="input-box">
-            <input type="password" id="loginPassword" name="password" placeholder="Password" autocomplete="current-password" required minlength="6">
+            <input type="password" id="loginPassword" name="password" placeholder="Contraseña o PIN" autocomplete="current-password" required>
             <i class='bx bxs-lock-alt'></i>
           </div>
 
-          <button type="submit" class="btn">Sign In</button>
+          <button type="submit" class="btn">Iniciar Sesión</button>
 
           <div class="register-link">
-            <p>Don't have an account? <a href="#" id="showRegister">Sign up</a></p>
+            <p>No tienes cuenta? <a href="#" id="showRegister">Regístrate</a></p>
           </div>
-
-          <div class="separator">or</div>
-
-          <button type="button" class="btn-google">
-            <i class='bx bxl-google'></i> Sign in with Google
-          </button>
 
           <p class="msg" id="loginMsg" aria-live="polite"></p>
         </form>
@@ -200,34 +194,33 @@
       <button class="modal-close" data-close="register" aria-label="Cerrar"><i class='bx bx-x'></i></button>
       <div class="login-wrapper">
         <form id="registerForm" novalidate>
-          <h1 id="registerTitle">Sign Up</h1>
+          <h1 id="registerTitle">Registro</h1>
 
           <div class="input-box">
-            <input type="text" id="registerName" name="name" placeholder="Name" required>
+            <input type="text" id="registerUsername" name="username" placeholder="Nombre de usuario" required>
             <i class='bx bxs-user'></i>
           </div>
 
-          <div class="input-box">
-            <input type="email" id="registerEmail" name="email" placeholder="Email" autocomplete="email" required>
-            <i class='bx bxs-envelope'></i>
+          <div class="auth-method">
+            <label><input type="radio" name="authMethod" value="password" checked> Contraseña</label>
+            <label><input type="radio" name="authMethod" value="pin"> PIN (4 dígitos)</label>
           </div>
 
-          <div class="input-box">
-            <input type="password" id="registerPassword" name="password" placeholder="Password" autocomplete="new-password" required minlength="6">
+          <div class="input-box" id="password-field">
+            <input type="password" id="registerPassword" name="password" placeholder="Contraseña" autocomplete="new-password">
             <i class='bx bxs-lock-alt'></i>
           </div>
 
-          <button type="submit" class="btn">Sign Up</button>
-
-          <div class="register-link">
-            <p>Already have an account? <a href="#" id="showLogin">Log In</a></p>
+          <div class="input-box" id="pin-field" style="display: none;">
+            <input type="password" id="registerPin" name="pin" placeholder="PIN de 4 dígitos" pattern="\\d{4}" maxlength="4">
+            <i class='bx bxs-key'></i>
           </div>
 
-          <div class="separator">or</div>
+          <button type="submit" class="btn">Registrarse</button>
 
-          <button type="button" class="btn-google">
-            <i class='bx bxl-google'></i> Sign up with Google
-          </button>
+          <div class="register-link">
+            <p>Ya tienes cuenta? <a href="#" id="showLogin">Inicia Sesión</a></p>
+          </div>
 
           <p class="msg" id="registerMsg" aria-live="polite"></p>
         </form>
