@@ -5,6 +5,21 @@ const $ = (s) => document.querySelector(s);
 const $$ = (s) => document.querySelectorAll(s);
 
 // ========================================
+// WELCOME SCREEN
+// ========================================
+window.addEventListener('DOMContentLoaded', () => {
+  const welcomeScreen = $('#welcomeScreen');
+  if (welcomeScreen && !sessionStorage.getItem('welcomeShown')) {
+    setTimeout(() => {
+      welcomeScreen.classList.add('hidden');
+      sessionStorage.setItem('welcomeShown', 'true');
+    }, 3000);
+  } else if (welcomeScreen) {
+    welcomeScreen.classList.add('hidden');
+  }
+});
+
+// ========================================
 // API HELPERS
 // ========================================
 const API_URL = 'http://localhost:5000/api';
