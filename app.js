@@ -9,6 +9,14 @@ const $$ = (s) => document.querySelectorAll(s);
 // ========================================
 const API_URL = 'http://localhost:5000/api';
 
+function parseJwt(token) {
+  try {
+    return JSON.parse(atob(token.split('.')[1]));
+  } catch (e) {
+    return null;
+  }
+}
+
 const getProducts = async () => {
   const response = await fetch(`${API_URL}/products`);
   return response.json();
@@ -208,6 +216,7 @@ navItems.forEach(a => {
     const name = a.dataset.view;
     if (name === 'salir') { 
       localStorage.removeItem('token');
+      localStorage.removeItem('username');
       window.location.reload();
       return; 
     }
@@ -244,6 +253,21 @@ searchInput.addEventListener('input', () => {
 const loginModal = $('#loginModal');
 const registerModal = $('#registerModal');
 const createModal = $('#createModal');
+const editProfileModal = $('#editProfileModal');
+
+const editProfileLink = document.querySelector('a[data-view="edit-profile"]');
+if(editProfileLink) {
+    editProfileLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        const dropdown = $('#profileDropdown');
+        dropdown.style.display = 'none';
+        const username = localStorage.getItem('username');
+        if (username) {
+            $('#editUsername').value = username;
+        }
+        open(editProfileModal);
+    });
+}
 
 const open = (el) => { 
   el.classList.add('open'); 
@@ -257,7 +281,23 @@ const close = (el) => {
   document.body.style.overflow = '';
 };
 
-$('#btnProfile').addEventListener('click', () => open(loginModal));
+$('#btnProfile').addEventListener('click', () => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    const dropdown = $('#profileDropdown');
+    dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+  } else {
+    open(loginModal);
+  }
+});
+
+window.addEventListener('click', (event) => {
+  const profileDropdown = $('#profileDropdown');
+  // If the dropdown is visible and the click is outside the profile dropdown container
+  if (profileDropdown.style.display === 'block' && !event.target.closest('.profile-dropdown')) {
+    profileDropdown.style.display = 'none';
+  }
+});
 $('#navCrear').addEventListener('click', (e) => { 
   e.preventDefault(); 
   open(createModal); 
@@ -278,10 +318,11 @@ $$('.modal-close').forEach(btn => {
     if (which === 'register') close(registerModal);
     if (which === 'create') close(createModal);
     if (which === 'product') closeProductModal();
+    if (which === 'editProfile') close(editProfileModal);
   });
 });
 
-[loginModal, registerModal, createModal, productModal].forEach(m =>
+[loginModal, registerModal, createModal, productModal, editProfileModal].forEach(m =>
   m.addEventListener('click', e => { 
     if (e.target === m) close(m); 
   })
@@ -293,6 +334,7 @@ window.addEventListener('keydown', e => {
     close(registerModal);
     close(createModal);
     closeProductModal();
+    close(editProfileModal);
   } 
 });
 
@@ -330,10 +372,12 @@ loginForm.addEventListener('submit', async (e) => {
   });
 
   const data = await response.json();
+  console.log('Login response:', data);
 
   if (response.ok) {
     localStorage.setItem('token', data.token);
-    loginMsg.textContent = 'Login exitoso ✅';
+    localStorage.setItem('username', data.user.nombre_usuario);
+    loginMsg.textContent = `Bienvenido, ${data.user.nombre_usuario}! ✅`;
     loginMsg.classList.add('ok');
     setTimeout(() => {
       close(loginModal);
@@ -394,6 +438,7 @@ registerForm.addEventListener('submit', async (e) => {
 
   if (response.ok) {
     localStorage.setItem('token', data.token);
+    localStorage.setItem('username', data.user.nombre_usuario);
     registerMsg.textContent = 'Registro exitoso! ✅';
     registerMsg.classList.add('ok');
     setTimeout(() => {
@@ -403,6 +448,75 @@ registerForm.addEventListener('submit', async (e) => {
   } else {
     registerMsg.textContent = data.msg;
     registerMsg.classList.remove('ok');
+  }
+});
+
+// ========================================
+// EDIT PROFILE
+// ========================================
+const editProfileForm = $('#editProfileForm');
+const editProfileMsg = $('#editProfileMsg');
+
+const editAuthMethodRadios = $$('input[name="editAuthMethod"]');
+editAuthMethodRadios.forEach(radio => {
+  radio.addEventListener('change', () => {
+    if (radio.value === 'password') {
+      $('#edit-password-field').style.display = 'block';
+      $('#edit-pin-field').style.display = 'none';
+    } else {
+      $('#edit-password-field').style.display = 'none';
+      $('#edit-pin-field').style.display = 'block';
+    }
+  });
+});
+
+editProfileForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  editProfileMsg.textContent = '';
+
+  const nombre_usuario = $('#editUsername').value.trim();
+  const authMethod = $('input[name="editAuthMethod"]:checked').value;
+  let password = null;
+  let codigo_pin = null;
+
+  if (authMethod === 'password') {
+    password = $('#editPassword').value.trim();
+  } else {
+    codigo_pin = $('#editPin').value.trim();
+  }
+
+  if (!nombre_usuario) {
+    editProfileMsg.textContent = 'Completa el nombre de usuario.';
+    return;
+  }
+
+  const body = {
+    nombre_usuario,
+    password,
+    codigo_pin
+  };
+
+  const token = localStorage.getItem('token');
+
+  const response = await fetch(`${API_URL}/user/profile`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', 'x-auth-token': token },
+    body: JSON.stringify(body)
+  });
+
+  const data = await response.json();
+
+  if (response.ok) {
+    localStorage.setItem('username', data.user.nombre_usuario);
+    editProfileMsg.textContent = 'Perfil actualizado! ✅';
+    editProfileMsg.classList.add('ok');
+    setTimeout(() => {
+      close(editProfileModal);
+      loadApp();
+    }, 600);
+  } else {
+    editProfileMsg.textContent = data.msg;
+    editProfileMsg.classList.remove('ok');
   }
 });
 
@@ -479,8 +593,9 @@ async function loadApp() {
   renderList(allProducts, '#gridCategorias');
 
   const statusIndicator = $('.status-indicator');
-  if(localStorage.getItem('token')) {
-    $('#btnProfile').innerHTML = `<i class='bx bxs-user'></i><span class="status-indicator online"></span>`;
+  const username = localStorage.getItem('username');
+  if(localStorage.getItem('token') && username) {
+    $('#btnProfile').innerHTML = `<i class='bx bxs-user'></i><span class="status-indicator online"></span><span>Hola, ${username}</span>`;
   } else {
     $('#btnProfile').innerHTML = `<i class='bx bx-user'></i><span class="status-indicator"></span>`;
   }
