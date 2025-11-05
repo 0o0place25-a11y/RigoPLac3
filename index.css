@@ -22,6 +22,10 @@
   --rad: 12px;
   --rad-lg: 16px;
 
+  /* NUEVAS VARIABLES para Transparencia */
+  --chat-bg-transparent: rgba(7, 139, 69, 0.15); /* Verde UVG al 15% de opacidad */
+  --chat-border-light: rgba(7, 139, 69, 0.35); /* Verde UVG al 35% de opacidad para el borde */
+
   /* tamaño del logo */
   --brand-size: 52px;
 }
@@ -575,10 +579,6 @@ body{
   transform: scale(1.1);
 }
 
-.card-fav-btn:hover i {
-  color: #ff4757;
-}
-
 .card-fav-btn.active {
   opacity: 1;
   background: #ff4757;
@@ -635,29 +635,29 @@ body{
     max-height: 80vh;
     overflow-y: auto;
   }
-  
+  
   .product-modal-image {
     border-radius: 16px 16px 0 0;
     min-height: 300px;
   }
-  
+  
   .product-modal-image img {
     min-height: 300px;
   }
-  
+  
   .modal-product {
     max-width: 95vw;
     max-height: 90vh;
   }
-  
+  
   .product-modal-title {
     font-size: 22px;
   }
-  
+  
   .product-modal-price {
     font-size: 28px;
   }
-  
+  
   .card-fav-btn {
     opacity: 1;
     transform: scale(1);
@@ -670,37 +670,37 @@ body{
     width: 98vw;
     border-radius: 12px;
   }
-  
+  
   .product-modal-body {
     padding: 20px 18px;
   }
-  
+  
   .product-modal-title {
     font-size: 20px;
   }
-  
+  
   .product-modal-price {
     font-size: 24px;
   }
-  
+  
   .btn-contact {
     font-size: 15px;
     padding: 12px 18px;
   }
-  
+  
   .fav-btn {
     width: 38px;
     height: 38px;
   }
-  
+  
   .fav-btn i {
     font-size: 20px;
   }
-  
+  
   .product-modal-image {
     min-height: 250px;
   }
-  
+  
   .product-modal-image img {
     min-height: 250px;
   }
@@ -712,7 +712,7 @@ body{
     flex-direction: column;
     align-items: flex-start;
   }
-  
+  
   .fav-btn {
     align-self: flex-end;
     margin-top: -8px;
@@ -816,4 +816,68 @@ body{
     transform: translateY(0);
     opacity: 1;
   }
+}
+
+/* ================================================= */
+/* ===== 💬 ESTILOS DE BARRA DE CHAT TRANSPARENTE ===== */
+/* ================================================= */
+
+.chat-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  
+  /* ESTILO PRINCIPAL (El rectángulo verde transparente) */
+  background: var(--chat-bg-transparent); /* Usando rgba(7, 139, 69, 0.15) */
+  border: 1px solid var(--chat-border-light); /* Borde más sutil */
+  
+  border-radius: var(--rad-lg); /* Bordes redondeados de tu tema */
+  padding: 10px 14px;
+  margin-top: 20px; 
+  box-shadow: 0 4px 10px rgba(7, 139, 69, 0.05); /* Sombra suave */
+}
+
+.chat-input-wrapper .chat-input {
+  /* Estilo del campo de texto */
+  border: none;
+  outline: none;
+  font: inherit;
+  flex-grow: 1; 
+  background: transparent; /* Permite ver el fondo verde transparente */
+  color: var(--text);
+}
+
+.chat-input-wrapper i {
+  /* Estilo de los iconos (clip) */
+  font-size: 24px;
+  color: var(--uvg-green);
+  opacity: 0.8;
+  transition: opacity 0.2s;
+}
+
+.chat-input-wrapper i:hover {
+    opacity: 1;
+}
+
+.chat-input-wrapper .send-btn {
+    /* Estilo del botón de enviar */
+    position: relative;
+    width: 38px;
+    height: 38px;
+    background: var(--uvg-green); /* Verde sólido para el botón */
+    border: none;
+    border-radius: 50%; /* Redondo */
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(7, 139, 69, 0.2);
+    flex-shrink: 0;
+}
+
+.chat-input-wrapper .send-btn i {
+    color: #fff; /* Ícono blanco */
+    font-size: 20px;
+    margin-left: 2px;
+}
+
+.chat-input-wrapper .send-btn:hover {
+    background: var(--uvg-green-dark);
 }
