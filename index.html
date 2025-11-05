@@ -53,19 +53,25 @@
 
     <!-- TOPBAR (UP)-->
     <header class="topbar">
-      <div class="left">
-        <div class="search">
-          <i class='bx bx-search'></i>
-          <input id="searchInput" type="text" placeholder="Búsqueda" aria-label="Buscar">
-        </div>
+      <div class="search">
+        <i class='bx bx-search'></i>
+        <input id="searchInput" type="text" placeholder="Búsqueda" aria-label="Buscar">
       </div>
-      <div class="right">
-        <button id="btnProfile" class="icon-btn" title="Perfil">
-          <i class='bx bx-user'></i>
-          <span class="status-indicator"></span>
-        </button>
+      <div class="topbar-right">
         <button class="icon-btn" title="Lista"><i class='bx bx-list-ul'></i></button>
         <button class="icon-btn" title="Panel"><i class='bx bx-layout'></i></button>
+        <div class="profile-dropdown">
+          <button id="btnProfile" class="icon-btn" title="Perfil">
+            <i class='bx bx-user'></i>
+            <span class="status-indicator"></span>
+          </button>
+          <div class="dropdown-content" id="profileDropdown">
+            <a href="#" data-view="mis-publicaciones">Mis Publicaciones</a>
+            <a href="favoritos.html">Favoritos</a>
+            <a href="#" data-view="edit-profile">Editar Perfil</a>
+            <a href="#" data-view="salir">Salir</a>
+          </div>
+        </div>
       </div>
     </header>
 
@@ -334,5 +340,41 @@
 
   <!-- JS -->
   <script src="app.js"></script>
+
+  <!-- EDIT PROFILE MODAL -->
+  <div id="editProfileModal" class="modal" aria-hidden="true" role="dialog" aria-labelledby="editProfileTitle">
+    <div class="modal-dialog">
+      <button class="modal-close" data-close="editProfile" aria-label="Cerrar"><i class='bx bx-x'></i></button>
+      <div class="login-wrapper">
+        <form id="editProfileForm" novalidate>
+          <h1 id="editProfileTitle">Editar Perfil</h1>
+
+          <div class="input-box">
+            <input type="text" id="editUsername" name="username" placeholder="Nombre de usuario" required>
+            <i class='bx bxs-user'></i>
+          </div>
+
+          <div class="auth-method">
+            <label><input type="radio" name="editAuthMethod" value="password" checked> Contraseña</label>
+            <label><input type="radio" name="editAuthMethod" value="pin"> PIN (4 dígitos)</label>
+          </div>
+
+          <div class="input-box" id="edit-password-field">
+            <input type="password" id="editPassword" name="password" placeholder="Nueva Contraseña" autocomplete="new-password">
+            <i class='bx bxs-lock-alt'></i>
+          </div>
+
+          <div class="input-box" id="edit-pin-field" style="display: none;">
+            <input type="password" id="editPin" name="pin" placeholder="Nuevo PIN de 4 dígitos" pattern="\\d{4}" maxlength="4">
+            <i class='bx bxs-key'></i>
+          </div>
+
+          <button type="submit" class="btn">Guardar Cambios</button>
+
+          <p class="msg" id="editProfileMsg" aria-live="polite"></p>
+        </form>
+      </div>
+    </div>
+  </div>
 </body>
 </html>

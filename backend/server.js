@@ -58,6 +58,57 @@ app.post('/api/auth/register', (req, res) => {
   });
 });
 
+// Edit Profile
+app.put('/api/user/profile', auth, (req, res) => {
+  const { nombre_usuario, password, codigo_pin } = req.body;
+  const userId = req.user.id;
+
+  if (!nombre_usuario) {
+    return res.status(400).json({ msg: 'Please enter a username' });
+  }
+
+  let password_hash = null;
+  let codigo_pin_hash = null;
+
+  if (password) {
+    const salt = bcrypt.genSaltSync(10);
+    password_hash = bcrypt.hashSync(password, salt);
+  }
+
+  if (codigo_pin) {
+    const salt = bcrypt.genSaltSync(10);
+    codigo_pin_hash = bcrypt.hashSync(codigo_pin, salt);
+  }
+
+  let query = 'UPDATE users SET nombre_usuario = ?';
+  const params = [nombre_usuario];
+
+  if (password_hash) {
+    query += ', password_hash = ?';
+    params.push(password_hash);
+  }
+
+  if (codigo_pin_hash) {
+    query += ', codigo_pin_hash = ?';
+    params.push(codigo_pin_hash);
+  }
+
+  query += ' WHERE id = ?';
+  params.push(userId);
+
+  db.run(query, params, function(err) {
+    if (err) {
+      return res.status(400).json({ msg: 'Username already exists' });
+    }
+    res.json({
+      user: {
+        id: userId,
+        nombre_usuario: nombre_usuario
+      }
+    });
+  });
+});
+
 // Login
 app.post('/api/auth/login', (req, res) => {
   const { nombre_usuario, password, codigo_pin } = req.body;
