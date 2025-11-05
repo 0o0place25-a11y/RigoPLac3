@@ -1,6 +1,79 @@
-# 🛒 RigoCompra! - Documentación
+# 🛒 RigoCompra! - Marketplace Universitario UVG
+
+## 🎓 Universidad del Valle de Guatemala
+
+**RigoCompra** es un marketplace diseñado específicamente para la comunidad universitaria de la UVG. Permite a estudiantes, profesores y personal comprar y vender productos, promover emprendimientos y conectar con la comunidad.
+
+---
+
+## 🚀 Inicio Rápido
+
+### 1. Instalar dependencias
+```bash
+cd backend
+npm install
+```
+
+### 2. Iniciar el servidor
+```bash
+node server.js
+```
+
+### 3. Abrir la aplicación
+Abre `index.html` en tu navegador o usa:
+```bash
+python -m http.server 8000
+# Luego visita: http://localhost:8000
+```
+
+**📖 Para instrucciones detalladas, consulta [SETUP-GUIDE.md](./SETUP-GUIDE.md)**
+
+---
+
+## 🎨 Colores Oficiales UVG Implementados
+
+La aplicación usa los colores institucionales de la Universidad del Valle de Guatemala:
+
+- **Verde UVG:** `#078b45` (Barra superior, acentos)
+- **Verde Claro:** `#7adcb4` (Elementos activos)
+- **Gris UVG:** `#5a6270` (Sidebar)
+- **Crema UVG:** `#fcf8e3` (Detalles)
+
+---
 
 ## 📋 Resumen de Características Implementadas
+
+### 🎨 Diseño UVG
+- ✅ Colores oficiales de la UVG aplicados
+- ✅ Barra superior verde UVG con iconos reorganizados
+- ✅ Sidebar gris opaco con navegación clara
+- ✅ Logo adaptado correctamente
+- ✅ Diseño responsive para móvil, tablet y desktop
+
+### 🌟 Pantalla de Bienvenida
+- ✅ Animación de bienvenida al ingresar
+- ✅ Logo con efecto de escalado
+- ✅ Texto animado que se desvanece
+- ✅ Aparece solo una vez por sesión
+
+### 🔐 Sistema de Autenticación
+- ✅ Registro con usuario y contraseña o PIN
+- ✅ Login automático después de registro
+- ✅ Detección automática de PIN (4 dígitos)
+- ✅ Contraseñas hasheadas con bcrypt
+- ✅ Autenticación JWT
+- ✅ Edición de perfil
+- ✅ Estado de sesión visible en el header
+
+### 🛍️ Productos
+- ✅ 22 productos de ejemplo pre-cargados
+- ✅ Imágenes de Unsplash
+- ✅ Categorías: Ropa, Comida, Tecnología, Hogar, Servicios
+- ✅ Modal de producto con información completa
+- ✅ Búsqueda en tiempo real
+- ✅ Filtros por categoría
+- ✅ Crear nuevas publicaciones
+- ✅ Ver "Mis publicaciones"
 
 ### ✨ Nuevas Funcionalidades
 
@@ -328,6 +401,173 @@ Si necesitas ayuda con la personalización o encuentras algún problema:
 - **Responsive**: Diseño que se adapta a diferentes tamaños de pantalla
 - **Toggle**: Alternar entre dos estados (favorito/no favorito)
 - **Hover**: Efecto al pasar el cursor sobre un elemento
+
+---
+
+---
+
+## 🗄️ Funciones de Base de Datos
+
+### Implementación Profesional
+
+Se han implementado **30+ funciones** de base de datos siguiendo mejores prácticas:
+
+**Categorías de funciones:**
+- 👤 **Usuarios:** findUserByUsername, findUserById, createUser, updateUser, deleteUser
+- 🛍️ **Productos:** getAllProducts, findProductById, getProductsByUser, getProductsByCategory, searchProducts, createProduct, updateProduct, deleteProduct
+- ❤️ **Favoritos:** getUserFavorites, addToFavorites, removeFromFavorites, isFavorite, getFavoriteProducts
+- 📊 **Estadísticas:** countProducts, countProductsByUser, getRecentProducts
+
+**Características:**
+- ✅ Todas las funciones usan Promises (async/await)
+- ✅ Manejo de errores consistente
+- ✅ Parámetros preparados (prevención de SQL injection)
+- ✅ Documentación completa con ejemplos
+- ✅ Reutilizables en todo el backend
+
+**📖 Documentación completa:** [DB-FUNCTIONS-GUIDE.md](./DB-FUNCTIONS-GUIDE.md)
+
+**Ubicación:** `backend/db-functions.js`
+
+**Ejemplo de uso:**
+```javascript
+const { getAllProducts, searchProducts } = require('./db-functions');
+
+// Obtener todos los productos
+const products = await getAllProducts();
+
+// Buscar productos
+const results = await searchProducts('laptop');
+```
+
+---
+
+## 📚 Documentación Adicional
+
+- **[SETUP-GUIDE.md](./SETUP-GUIDE.md)** - Guía completa de instalación y uso
+- **[DB-FUNCTIONS-GUIDE.md](./DB-FUNCTIONS-GUIDE.md)** - Documentación de funciones de base de datos
+- **[README.md](./README.md)** - Este archivo
+
+---
+
+## 🎯 Características Implementadas por Requerimiento
+
+### ✅ Colores UVG
+- Verde oficial (#078b45) en barra superior
+- Gris opaco (#5a6270) en sidebar
+- Todos los acentos usan colores institucionales
+
+### ✅ Iconos Reorganizados
+- Perfil, Panel y Lista correctamente posicionados en topbar
+- Iconos con mejor contraste sobre fondo verde
+- Animaciones suaves en hover
+
+### ✅ Logo Adaptado
+- Logo visible en sidebar colapsado
+- Se expande al hacer hover
+- Mantiene proporciones correctas
+
+### ✅ Pantalla de Bienvenida
+- Animación de entrada al cargar el sitio
+- Desvanecimiento gradual después de 3 segundos
+- Solo aparece una vez por sesión
+
+### ✅ Productos Múltiples
+- 22 productos con imágenes reales
+- 5 en "Publicado por ti"
+- 17 en "Para ti"
+- Categorías variadas
+
+### ✅ Autenticación Mejorada
+- Usuario + PIN de 4 dígitos
+- Usuario + Contraseña tradicional
+- Detección automática del método
+- Guardado en base de datos local (SQLite)
+- No requiere backend externo para funcionar
+
+### ✅ Dropdown de Perfil Funcional
+- Muestra nombre de usuario
+- Indicador de estado online
+- Links a Mis Publicaciones, Favoritos, Editar Perfil, Salir
+- Funciona correctamente
+
+### ✅ Funciones de Base de Datos
+- 30+ funciones documentadas
+- Siguiendo patrones profesionales
+- Código reutilizable
+- Ejemplos de uso incluidos
+
+### ✅ Todos los Botones Funcionan
+- Navegación completa entre secciones
+- Botones de acción implementados
+- Modales con funcionalidad real
+- Sin enlaces rotos
+
+---
+
+## 🚀 Tecnologías Utilizadas
+
+### Frontend
+- HTML5
+- CSS3 (Grid, Flexbox, Animaciones)
+- JavaScript Vanilla (ES6+)
+- Boxicons
+
+### Backend
+- Node.js
+- Express.js
+- SQLite3
+- bcryptjs (Encriptación)
+- JSON Web Tokens (JWT)
+
+### Características Técnicas
+- Sistema de autenticación completo
+- Base de datos relacional
+- API RESTful
+- Responsive design
+- Animaciones CSS
+- LocalStorage & SessionStorage
+- CRUD completo
+
+---
+
+## 🔒 Seguridad Implementada
+
+- ✅ Contraseñas hasheadas con bcrypt (10 rounds)
+- ✅ PINs hasheados con bcrypt
+- ✅ Autenticación JWT
+- ✅ Tokens con expiración
+- ✅ Prepared statements (prevención de SQL injection)
+- ✅ CORS configurado
+- ✅ Validación de entrada
+
+---
+
+## 📞 Soporte y Contacto
+
+Para dudas sobre:
+- **Instalación:** Consulta [SETUP-GUIDE.md](./SETUP-GUIDE.md)
+- **Base de datos:** Consulta [DB-FUNCTIONS-GUIDE.md](./DB-FUNCTIONS-GUIDE.md)
+- **Funcionalidades:** Consulta esta documentación
+
+---
+
+## 🎓 Información Académica
+
+**Proyecto:** RigoCompra - Marketplace Universitario
+**Institución:** Universidad del Valle de Guatemala (UVG)
+**Propósito:** Plataforma de compra-venta para la comunidad universitaria
+**Tecnologías:** Full Stack (Frontend + Backend + Base de Datos)
+
+**Funcionalidades requeridas implementadas:**
+- ✅ Colores institucionales UVG
+- ✅ Sistema de autenticación completo
+- ✅ Base de datos con funciones documentadas
+- ✅ Interfaz responsive y moderna
+- ✅ CRUD completo de productos
+- ✅ Sistema de favoritos
+- ✅ Búsqueda y filtros
+- ✅ Integración con WhatsApp
 
 ---
 
