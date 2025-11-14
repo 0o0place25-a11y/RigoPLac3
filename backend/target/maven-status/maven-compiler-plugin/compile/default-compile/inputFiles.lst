@@ -1,0 +1,6 @@
+/app/backend/src/main/java/com/rigoplace/InMemoryUserDAO.java
+/app/backend/src/main/java/com/rigoplace/LoginHandler.java
+/app/backend/src/main/java/com/rigoplace/Main.java
+/app/backend/src/main/java/com/rigoplace/RegistrationHandler.java
+/app/backend/src/main/java/com/rigoplace/User.java
+/app/backend/src/main/java/com/rigoplace/UserDAO.java

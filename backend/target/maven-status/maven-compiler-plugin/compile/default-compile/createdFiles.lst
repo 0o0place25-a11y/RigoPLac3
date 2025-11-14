@@ -1,0 +1,6 @@
+com/rigoplace/Main.class
+com/rigoplace/User.class
+com/rigoplace/RegistrationHandler.class
+com/rigoplace/LoginHandler.class
+com/rigoplace/UserDAO.class
+com/rigoplace/InMemoryUserDAO.class
