@@ -60,7 +60,10 @@
         </div>
       </div>
       <div class="right">
-        <button id="btnProfile" class="icon-btn" title="Perfil"><i class='bx bx-user'></i></button>
+        <button id="btnProfile" class="icon-btn" title="Perfil">
+          <i class='bx bx-user'></i>
+          <span class="status-indicator offline"></span>
+        </button>
         <button class="icon-btn" title="Lista"><i class='bx bx-list-ul'></i></button>
         <button class="icon-btn" title="Panel"><i class='bx bx-layout'></i></button>
       </div>
@@ -126,6 +129,33 @@
         </ul>
       </section>
 
+      <section class="section view" id="view-perfil" hidden>
+        <h2 class="section-title">Mi Perfil</h2>
+        <div class="profile-container">
+          <div class="profile-header">
+            <img id="profileImage" src="https://via.placeholder.com/150" alt="Foto de perfil" class="profile-img">
+            <input type="file" id="profileImageUpload" hidden>
+            <button id="btnChangeImage" class="btn-change-image">Cambiar foto</button>
+            <h3 id="profileName"></h3>
+          </div>
+          <div class="profile-details">
+            <form id="profileForm">
+              <div class="input-box">
+                <label for="profileFirstName">Nombre</label>
+                <input type="text" id="profileFirstName" name="firstName">
+              </div>
+              <div class="input-box">
+                <label for="profileLastName">Apellido</label>
+                <input type="text" id="profileLastName" name="lastName">
+              </div>
+              <button type="submit" class="btn">Guardar Cambios</button>
+            </form>
+          </div>
+        </div>
+        <h2 class="section-title">Mis Favoritos</h2>
+        <div id="gridProfileFavs" class="card-grid"></div>
+      </section>
+
     
       <!-- Eventos -->
       <section class="section view" id="view-eventos" hidden>
@@ -173,6 +203,16 @@
         <form id="loginForm" novalidate>
           <h1 id="loginTitle">Login</h1>
 
+          <div class="input-box register-only" hidden>
+            <input type="text" id="firstName" name="firstName" placeholder="Nombre" autocomplete="given-name">
+            <i class='bx bxs-user'></i>
+          </div>
+
+          <div class="input-box register-only" hidden>
+            <input type="text" id="lastName" name="lastName" placeholder="Apellido" autocomplete="family-name">
+            <i class='bx bxs-user'></i>
+          </div>
+
           <div class="input-box">
             <input type="text" id="username" name="username" placeholder="Username" autocomplete="username" required>
             <i class='bx bxs-user'></i>
@@ -181,6 +221,13 @@
           <div class="input-box">
             <input type="password" id="password" name="password" placeholder="Password" autocomplete="current-password" required minlength="6">
             <i class='bx bxs-lock-alt'></i>
+          </div>
+
+          <div class="input-box register-only" hidden>
+            <select id="credentialType">
+              <option value="password">Contraseña</option>
+              <option value="pin">PIN (4-8 dígitos)</option>
+            </select>
           </div>
 
           <div class="remember-forgot">
@@ -296,8 +343,7 @@
 
   <!-- JS -->
   <script src="data.js"></script>
-  <script src="backend/userDAO.js"></script>
-  <script src="app-auth.js"></script>
+  <script src="auth.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
